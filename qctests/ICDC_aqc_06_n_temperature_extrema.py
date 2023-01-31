@@ -19,7 +19,7 @@ c    find profiles with unrealistically large number of temperature extrema
 from . import ICDC_aqc_01_level_order as ICDC
 import numpy as np
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     '''Return quality control decisions.
     '''
     
@@ -60,3 +60,8 @@ def test(p, parameters):
 
 
 
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

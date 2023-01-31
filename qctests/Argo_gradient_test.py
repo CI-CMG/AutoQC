@@ -5,7 +5,7 @@ Implements the gradient test on page 8 of http://w3.jcommops.org/FTPRoot/Argo/Do
 import numpy
 from util import obs_utils
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -39,3 +39,10 @@ def test(p, parameters):
               qc[i] = isSlope > 3.0
 
     return qc
+
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

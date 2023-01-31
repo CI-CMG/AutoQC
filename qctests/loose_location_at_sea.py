@@ -7,13 +7,14 @@
 
 from netCDF4 import Dataset
 import numpy as np
+import os
 
 # Define the area either side of the closest global relief point that is 
 # checked for ocean points. 
 width = 2
 
 # Load data into memory. Include a halo so that we can handle points next the data line.
-nc = Dataset('data/etopo5.nc')
+nc = Dataset(os.environ.get('AUTO_QC_HOME') + "/data/etopo5.nc" if os.environ.get('AUTO_QC_HOME') else 'data/etopo5.nc')
 etopx = nc.variables['ETOPO05_X'][:]
 etopy = nc.variables['ETOPO05_Y'][:]
 etoph = np.ndarray([len(etopy) + width * 2, len(etopx) + width * 2])
@@ -23,7 +24,7 @@ etoph[width:-width, 0:width] = etoph[width:-width, -2*width:-width]
 etoph[width:-width, -width:] = etoph[width:-width, width:2*width]
 nc.close()
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     '''Return an array of QC decisions. There is a QC result per level but these
        are all set to the same value, determined by the location.
     ''' 
@@ -50,6 +51,11 @@ def test(p, parameters):
         qc[:] = True
 
     return qc
-    
 
-    
+
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

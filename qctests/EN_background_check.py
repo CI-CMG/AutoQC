@@ -11,7 +11,7 @@ from netCDF4 import Dataset
 import util.main as main
 from util.dbutils import retrieve_existing_qc_result
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -20,16 +20,23 @@ def test(p, parameters):
 
     # Check if the QC of this profile was already done and if not
     # run the QC.
-    qc_log = retrieve_existing_qc_result('en_background_check', 
+    qc_log = None
+    if parameters.get('cache_test_in_store'):
+        qc_log = data_store.get(p.uid(), 'en_background_check')
+    else:
+        qc_log = retrieve_existing_qc_result('en_background_check',
                                          p.uid(),
                                          parameters['table'], 
                                          parameters['db'])
     if qc_log is not None:
         return qc_log
 
-    return run_qc(p, parameters)
+    qc_log = run_qc(p, parameters, data_store)
+    if parameters.get('cache_test_in_store'):
+        data_store.put(p.uid(), 'en_background_check', qc_log)
+    return qc_log
 
-def run_qc(p, parameters):
+def run_qc(p, parameters, data_store):
     """
     Performs the QC check.
     """
@@ -57,7 +64,7 @@ def run_qc(p, parameters):
 
     # Remove missing data points.
     iOK = (clim.mask == False) & (bgev.mask == False)
-    if np.count_nonzero(iOK) == 0: 
+    if np.count_nonzero(iOK) == 0:
         record_parameters(p, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, parameters)
         return qc
     clim = clim[iOK]
@@ -79,7 +86,7 @@ def run_qc(p, parameters):
     pressures = gsw.p_from_z(-depth, p.latitude())
 
     # Use the EN_spike_and_step_check to find suspect values.
-    suspect = EN_spike_and_step_check.test(p, parameters, suspect=True)
+    suspect = EN_spike_and_step_check.test(p, parameters, data_store, suspect=True)
 
     # Loop over levels.
     for iLevel in range(p.n_levels()):
@@ -90,19 +97,19 @@ def run_qc(p, parameters):
         bgevLevel = np.interp(z[iLevel], depths, bgev, right=99999)
         obevLevel = np.interp(z[iLevel], depths, obev, right=99999)
         if climLevel == 99999:
-            continue 
+            continue
         assert bgevLevel > 0, 'Background error variance <= 0'
         assert obevLevel > 0, 'Observation error variance <= 0'
-        
-        # If at low latitudes the background error variance is increased. 
-        # Also, because we are on reported levels instead of standard levels 
+
+        # If at low latitudes the background error variance is increased.
+        # Also, because we are on reported levels instead of standard levels
         # the variances are increased. NB multiplication factors are squared
         # because we are working with error variances instead of standard
         # deviations.
         if np.abs(p.latitude()) < 10.0: bgevLevel *= 1.5**2
         bgevLevel *= 2.0**2
-        
-        # Set up an initial estimate of probability of gross error. 
+
+        # Set up an initial estimate of probability of gross error.
         pge = estimatePGE(p.probe_type(), suspect[iLevel])
 
         # Calculate potential temperature.
@@ -118,34 +125,27 @@ def run_qc(p, parameters):
         pdGood  = np.exp(-0.5 * np.min([sdiff, 160.0])) / np.sqrt(2.0 * np.pi * evLevel)
         pdTotal = 0.1 * pge + pdGood * (1.0 - pge)
         pgebk   = 0.1 * pge / pdTotal
-              
-        if pgebk >= 0.5: 
+
+        if pgebk >= 0.5:
             qc[iLevel] = True
         else:
             # Store the results.
             origLevels.append(iLevel)
             ptLevels.append(potm)
             bgLevels.append(climLevel)
-    record_parameters(p, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, parameters)
+    record_parameters(p, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, data_store)
 
     return qc
 
-def record_parameters(profile, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, parameters):
+def record_parameters(profile, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, data_store):
     # pack the parameter arrays into the enbackground table
     # for consumption by the buddy check
-
-    bgstdlevels = main.pack_array(bgStdLevels)
-    bgevstdlevels = main.pack_array(bgevStdLevels)
-    origlevels = main.pack_array(origLevels)
-    ptlevels = main.pack_array(ptLevels)
-    bglevels = main.pack_array(bgLevels)
-    query = "REPLACE INTO enbackground VALUES(?,?,?,?,?,?);"
-    main.dbinteract(query, [profile.uid(), bgstdlevels, bgevstdlevels, origlevels, ptlevels, bglevels], targetdb=parameters["db"])
+    data_store.put(profile.uid(), 'enbackground', {'bgstdlevels':bgStdLevels, 'bgevstdlevels':bgevStdLevels, 'origlevels':origLevels, 'ptlevels':ptLevels, 'bglevels':bgLevels})
 
 
 def findGridCell(p, gridLong, gridLat):
     '''
-    Find grid cell nearest to the observation p, 
+    Find grid cell nearest to the observation p,
     where gridLong and gridLat are lists of grid coordinates.
     '''
     for i in range(1, len(gridLong)):
@@ -172,12 +172,12 @@ def findGridCell(p, gridLong, gridLat):
 def estimatePGE(probe_type, isSuspect):
     '''
     Estimates the probability of gross error for a measurement taken by
-    the given probe_type. Information from the EN_spike_and_step_check 
+    the given probe_type. Information from the EN_spike_and_step_check
     is used here to increase the initial estimate if the observation is suspect.
     '''
     if probe_type in [1,2,3,13,16]:
-        pge = 0.05    
-    else: 
+        pge = 0.05
+    else:
         pge = 0.01
     if isSuspect:
         pge = 0.5 + 0.5 * pge
@@ -199,12 +199,13 @@ def readENBackgroundCheckAux():
     data['clim']  = nc.variables['potm_climatology'][:]
     data['bgev']  = nc.variables['bg_err_var'][:]
     data['obev']  = nc.variables['ob_err_var'][:]
-    
+
     return data
 
-def loadParameters(parameterStore):
+def prepare_data_store(data_store):
+    data_store.prepare('enbackground', [{'name':'bgstdlevels', 'type':'BLOB'}, {'name':'bgevstdlevels', 'type':'BLOB'}, {'name':'origlevels', 'type':'BLOB'}, {'name':'ptlevels', 'type':'BLOB'}, {'name':'bglevels', 'type':'BLOB'}])
 
-    main.dbinteract("CREATE TABLE IF NOT EXISTS enbackground (uid INTEGER PRIMARY KEY, bgstdlevels BLOB, bgevstdlevels BLOB, origlevels BLOB, ptlevels BLOB, bglevels BLOB)", targetdb=parameterStore["db"])
+def loadParameters(parameterStore):
     parameterStore['enbackground'] = readENBackgroundCheckAux()
 
 

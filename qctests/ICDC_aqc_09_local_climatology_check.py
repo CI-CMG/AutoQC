@@ -33,7 +33,7 @@ import numpy as np
 import os
 import time
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     '''Return quality control decisions.
     '''
     
@@ -125,6 +125,9 @@ def get_climatology_range(nlevels, z, lat, lon, month, paramsicdc09):
         tmax[k] = tmaxa
 
     return tmin, tmax
+
+def prepare_data_store(data_store):
+    pass
 
 def loadParameters(parameterStore):
     datadict = {}

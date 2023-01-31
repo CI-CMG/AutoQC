@@ -4,7 +4,7 @@ Implements a global range check used to filter out very obvious errors.
 
 from util import obs_utils
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """ 
     Runs the quality control check on profile p and returns a numpy array 
     of quality control decisions with False where the data value has 
@@ -21,4 +21,8 @@ def test(p, parameters):
     
     return qc
 
+def prepare_data_store(data_store):
+    pass
 
+def loadParameters(parameterStore):
+    pass

@@ -7,7 +7,7 @@ import math, numpy
 import util.main as main
 from util.dbutils import retrieve_existing_qc_result
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """ 
     Runs the quality control check on profile p and returns a numpy array 
     of quality control decisions with False where the data value has 
@@ -16,14 +16,21 @@ def test(p, parameters):
 
     # Check if the QC of this profile was already done and if not
     # run the QC.
-    qc_log = retrieve_existing_qc_result('en_stability_check', 
-                                         p.uid(),
-                                         parameters['table'], 
-                                         parameters['db'])
+    qc_log = None
+    if parameters.get('cache_test_in_store'):
+        qc_log = data_store.get(p.uid(), 'en_stability_check')
+    else:
+        qc_log = retrieve_existing_qc_result('en_stability_check',
+                                             p.uid(),
+                                             parameters['table'],
+                                             parameters['db'])
     if qc_log is not None:
         return qc_log
-        
-    return run_qc(p, parameters)
+
+    qc_log = run_qc(p, parameters)
+    if parameters.get('cache_test_in_store'):
+        data_store.put(p.uid(), 'en_stability_check', qc_log)
+    return qc_log
 
 def run_qc(p, parameters):
 
@@ -174,3 +181,9 @@ def potentialTemperature(S, T, p):
     poly += coef[7]*T*p
 
     return T + p*poly
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

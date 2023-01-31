@@ -4,7 +4,7 @@ pp 46 http://data.nodc.noaa.gov/woa/WOD/DOC/wodreadme.pdf
 """
 import numpy, csv
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """ 
     Runs the quality control check on profile p and returns a numpy array 
     of quality control decisions with False where the data value has 
@@ -146,6 +146,8 @@ def readWOD_temperature_ranges(filename='data/WOD_ranges_Temperature.csv'):
 
   return WODtemps
 
+def prepare_data_store(data_store):
+    pass
 
 def loadParameters(parameterStore):
 

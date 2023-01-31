@@ -10,7 +10,7 @@ import os
 parmaxover = 33.0
 parminover = -2.0
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     '''Return quality control decisions'''
 
     # Define default QC.
@@ -221,6 +221,12 @@ def loadParameters(parameterStore):
         datadict['fill_value'] = nc.variables['tmin_monthly']._FillValue
         parameterStore['icdc10'] = datadict
         nc.close()
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass
 
 if __name__ == "__main__":
     # Generate the netCDF version of the data file.

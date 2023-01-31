@@ -12,7 +12,7 @@ import copy, datetime, math, sys, calendar, sqlite3
 DistRes = 20000. # meters
 TimeRes = 600. # seconds
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -429,3 +429,9 @@ def condition_h(rows, speeds, angles, index, maxSpeed):
             return index, 'h'
 
     return -1, 'i'
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

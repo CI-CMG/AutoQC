@@ -10,7 +10,7 @@ from . import EN_background_check, EN_constant_value_check, EN_increasing_depth_
 import util.main as main
 import numpy as np
 
-def test(p, parameters, allow_level_reinstating=True):
+def test(p, parameters, data_store, allow_level_reinstating=True):
     """ 
     Runs the quality control check on profile p and returns a numpy array 
     of quality control decisions with False where the data value has 
@@ -229,12 +229,12 @@ def stdLevelData(p, parameters):
     """
 
     # Combine other QC results.
-    preQC = (EN_background_check.test(p, parameters) | 
-             EN_constant_value_check.test(p, parameters) | 
-             EN_increasing_depth_check.test(p, parameters) | 
-             EN_range_check.test(p, parameters) |
-             EN_spike_and_step_check.test(p, parameters) | 
-             EN_stability_check.test(p, parameters))
+    preQC = (EN_background_check.test(p, parameters, data_store) |
+             EN_constant_value_check.test(p, parameters, data_store) |
+             EN_increasing_depth_check.test(p, parameters, data_store) |
+             EN_range_check.test(p, parameters, data_store) |
+             EN_spike_and_step_check.test(p, parameters, data_store) |
+             EN_stability_check.test(p, parameters, data_store))
 
     # Get the data stored by the EN background check.
     # As it was run above we know that the data is available in the db.
@@ -381,3 +381,9 @@ def get_profile_info(parameters):
 
     query = 'SELECT uid,year,month,cruise,lat,long FROM ' + parameters['table']
     return main.dbinteract(query, targetdb=parameters["db"])
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

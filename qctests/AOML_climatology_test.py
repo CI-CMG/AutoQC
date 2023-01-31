@@ -5,7 +5,7 @@ import sys, numpy
 import util.AOMLinterpolation as interp_helper
 import util.AOMLnetcdf as read_netcdf
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     qc = numpy.zeros(p.n_levels(), dtype=bool)
 
     # check for gaps in data
@@ -80,3 +80,8 @@ def subset_climatology_data(longitude, latitude, statType, coordRange=1, filePat
 
   return latLonDepthTempList, depthColumns, latLonList
 
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+  pass

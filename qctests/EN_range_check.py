@@ -3,7 +3,7 @@ Implements the global range check used in the EN quality control
 system. 
 """
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """ 
     Runs the quality control check on profile p and returns a numpy array 
     of quality control decisions with False where the data value has 
@@ -21,3 +21,8 @@ def test(p, parameters):
     return qc
 
 
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

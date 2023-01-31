@@ -4,7 +4,7 @@
 
 import numpy
 
-def test(p, parameters):
+def test(p, parameters, data_store):
 
     qc = numpy.zeros(p.n_levels(), dtype=bool)
     # this spike test only makes sense for 3 or more levels
@@ -39,7 +39,11 @@ def spike(t):
 
     return False
 
+def prepare_data_store(data_store):
+    pass
 
+def loadParameters(parameterStore):
+    pass
 
 
 

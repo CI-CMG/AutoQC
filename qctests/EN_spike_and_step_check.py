@@ -11,7 +11,7 @@ remove these elements and include them within the background check code.
 import numpy as np
 import util.main as main
 
-def test(p, parameters, suspect=False):
+def test(p, parameters, data_store, suspect=False):
     """ 
     Runs the quality control check on profile p and returns a numpy array 
     of quality control decisions with False where the data value has 
@@ -21,16 +21,15 @@ def test(p, parameters, suspect=False):
     set to True the test instead returns suspect levels.
     """
     
-    return run_qc(p, suspect, parameters)
+    return run_qc(p, suspect, data_store)
 
-def run_qc(p, suspect, parameters):
+def run_qc(p, suspect, data_store):
 
     # check for pre-registered suspect tabulation, if that's what we want:
     if suspect:
-        query = 'SELECT suspect FROM enspikeandstep WHERE uid = ' + str(p.uid()) + ';'
-        susp = main.dbinteract(query, targetdb=parameters["db"])
-        if len(susp) > 0:
-            return main.unpack_row(susp[0])[0]
+        susp = data_store.get(p.uid(), 'enspikeandstep')
+        if susp:
+            return susp['suspect']
             
     # Define tolerances used.
     tolD     = np.array([0, 200, 300, 500, 600])
@@ -102,8 +101,7 @@ def run_qc(p, suspect, parameters):
 
     # register suspects, if computed, to db
     if suspect:
-        query = "REPLACE INTO enspikeandstep VALUES(?,?);"
-        main.dbinteract(query, [p.uid(), main.pack_array(qc)], targetdb=parameters["db"] )
+        data_store.put(p.uid(), 'enspikeandstep', {'suspect':qc})
 
     return qc
 
@@ -198,8 +196,10 @@ def interpolate(depth, shallow, deep, shallowVal, deepVal):
     interpolate values at <depth>
     '''
 
-    return (depth - shallow) / (deep - shallow) * (deepVal - shallowVal) + shallowVal 
+    return (depth - shallow) / (deep - shallow) * (deepVal - shallowVal) + shallowVal
+
+def prepare_data_store(data_store):
+    data_store.prepare('enspikeandstep', [{'name':'suspect', 'type':'BLOB'}])
 
 def loadParameters(parameterStore):
-
-    main.dbinteract("CREATE TABLE IF NOT EXISTS enspikeandstep (uid INTEGER PRIMARY KEY, suspect BLOB)", targetdb=parameterStore["db"])
+    pass

@@ -5,7 +5,7 @@ Implements the regional range test on page 7 of http://w3.jcommops.org/FTPRoot/A
 import numpy, pyproj
 from shapely.geometry import Polygon, Point
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -65,3 +65,8 @@ def isInRegion(lat, longitude, regionLat, regionLong):
     return testPoint.within(poly_proj)
 
 
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

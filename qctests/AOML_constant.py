@@ -3,7 +3,7 @@
 
 import numpy
 
-def test(p, parameters):
+def test(p, parameters, data_store):
 
     qc = numpy.zeros(p.n_levels(), dtype=bool)
     t = p.t()
@@ -18,3 +18,9 @@ def test(p, parameters):
         return numpy.ones(p.n_levels(), dtype=bool)
 
     return qc
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

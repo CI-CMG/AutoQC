@@ -19,7 +19,7 @@ c    to check weather the temperature value is within the crude range
 from . import ICDC_aqc_01_level_order as ICDC
 import numpy as np
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     '''Return a set of QC decisions. 
     '''
     
@@ -64,5 +64,11 @@ zcrude2 = np.array(
 
 parminover = -2.3
 parmaxover = 33.0
+
+def prepare_data_store(data_store):
+  pass
+
+def loadParameters(parameterStore):
+  pass
 
 

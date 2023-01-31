@@ -1,7 +1,7 @@
 import numpy
 import util.main as main
 
-def test(p, parameters):
+def test(p, parameters, data_store):
 
     d = p.z()
     lat = p.latitude()
@@ -20,3 +20,9 @@ def test(p, parameters):
             qc[i] = d[i] > floor
 
     return qc
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

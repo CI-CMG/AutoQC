@@ -8,7 +8,7 @@ from collections import Counter
 import util.main as main
 from util.dbutils import retrieve_existing_qc_result
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -17,14 +17,21 @@ def test(p, parameters):
 
     # Check if the QC of this profile was already done and if not
     # run the QC.
-    qc_log = retrieve_existing_qc_result('en_increasing_depth_check', 
-                                         p.uid(),
-                                         parameters['table'], 
-                                         parameters['db'])
+    qc_log = None
+    if parameters.get('cache_test_in_store'):
+        qc_log = data_store.get(p.uid(), 'en_increasing_depth_check')
+    else:
+        qc_log = retrieve_existing_qc_result('en_increasing_depth_check',
+                                             p.uid(),
+                                             parameters['table'],
+                                             parameters['db'])
     if qc_log is not None:
         return qc_log
-        
-    return run_qc(p, parameters)
+
+    qc_log = run_qc(p, parameters, data_store)
+    if parameters.get('cache_test_in_store'):
+        data_store.put(p.uid(), 'en_increasing_depth_check', qc_log)
+    return qc_log
 
 def mask_index(mat, index):
     """
@@ -38,7 +45,7 @@ def mask_index(mat, index):
         mat[index, i] = 0
         mat[i, index] = 0
 
-def run_qc(p, parameters):
+def run_qc(p, parameters, data_store):
 
     # Get z values from the profile.
     d    = p.z()
@@ -111,7 +118,7 @@ def run_qc(p, parameters):
             try:
                 spikeqc
             except:
-                spikeqc = EN_spike_and_step_check.test(p, parameters)
+                spikeqc = EN_spike_and_step_check.test(p, parameters, data_store)
             if spikeqc[currentLev]: qc[currentLev] = True
             if spikeqc[otherLev]:   qc[otherLev]   = True
             if spikeqc[currentLev] == False and spikeqc[otherLev] == False:
@@ -124,3 +131,8 @@ def run_qc(p, parameters):
             mask_index(comp, otherLev)
     return qc
 
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

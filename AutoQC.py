@@ -3,8 +3,9 @@ import pickle, sys, os, calendar, time, ast, getopt
 import numpy as np
 import util.main as main
 from multiprocessing import Pool
+from .db_test_data_store import DbTestDataStore
 
-def run(test, profiles, parameters):
+def run(test, profiles, parameters, data_store):
   '''
   run <test> on a list of <profiles>, return an array summarizing when exceptions were raised
   '''
@@ -12,7 +13,7 @@ def run(test, profiles, parameters):
   verbose = []
   exec('from qctests import ' + test)
   for profile in profiles:
-    exec('verbose.append(' + test + '.test(profile, parameters))')
+    exec('verbose.append(' + test + '.test(profile, parameters, data_store))')
 
   return verbose
 
@@ -98,14 +99,15 @@ print('\nPlease wait while QC is performed\n')
 # set up global parmaeter store
 parameterStore = {
   "table": dbtable,
-  "db": targetdb
+  "db": targetdb,
 }
+
+data_store = DbTestDataStore(targetdb)
+
 for test in testNames:
   exec('from qctests import ' + test)
-  try:
-    exec(test + '.loadParameters(parameterStore)')
-  except:
-    print('No parameters to load for', test)
+  exec(test + '.loadParameters(parameterStore)')
+  exec(test + '.prepare_data_store(data_store)')
 
 # connect to database & fetch list of all uids
 query = 'SELECT uid FROM ' + dbtable + ' ORDER BY uid;'

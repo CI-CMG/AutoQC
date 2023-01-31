@@ -20,32 +20,32 @@ c    if necessary to bring the original levels to increasing order
 
 import numpy as np
 import util.main as main
-import pickle, sqlite3, io
+import pickle, io
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     '''Return a set of QC decisions. This corresponds to levels with
        negative depths.
     '''
-    
-    uid, nlevels, origlevels, zr, tr, qc = level_order(p, parameters)
+
+    uid, nlevels, origlevels, zr, tr, qc = level_order(p, data_store)
 
     return qc
 
-def reordered_data(p, parameters):
+def reordered_data(p, data_store):
     '''Return number levels and depth, temperature in depth order.
        Only non-rejected levels are returned.
     '''
 
-    uid, nlevels, origlevels, zr, tr, qc = level_order(p, parameters)
+    uid, nlevels, origlevels, zr, tr, qc = level_order(p, data_store)
 
     return nlevels, zr, tr
 
-def revert_order(p, data, parameters):
+def revert_order(p, data, data_store):
     '''Return data in the original profile order. Data rejected in
        the level_order function are returned as missing data.
     '''
 
-    uid, nlevels, origlevels, zr, tr, qc = level_order(p, parameters)
+    uid, nlevels, origlevels, zr, tr, qc = level_order(p, data_store)
 
     datar      = np.ma.array(np.ndarray(p.n_levels()), 
                              dtype = data.dtype)
@@ -56,28 +56,22 @@ def revert_order(p, data, parameters):
 
     return datar
 
-def revert_qc_order(p, qc, parameters):
+def revert_qc_order(p, qc, data_store):
     '''Return QC array. Missing data values are set to False.'''
     
-    qcr = revert_order(p, qc, parameters)
+    qcr = revert_order(p, qc, data_store)
     qcr[qcr.mask] = False
     return qcr
 
-def level_order(p, parameters):
+def level_order(p, data_store):
     '''Reorders data into depth order and rejects levels with 
        negative depth.
     '''
     
     # check if the relevant info is already in the db
-    query = 'SELECT nlevels, origlevels, zr, tr, qc FROM icdclevelorder WHERE uid = ' + str(p.uid())
-    precomputed = main.dbinteract(query, targetdb=parameters["db"])
-    if len(precomputed) > 0:
-        nlevels = precomputed[0][0]
-        origlevels = pickle.load(io.BytesIO(precomputed[0][1]))
-        zr = pickle.load(io.BytesIO(precomputed[0][2]))
-        tr = pickle.load(io.BytesIO(precomputed[0][3]))
-        qc = pickle.load(io.BytesIO(precomputed[0][4]))
-        return p.uid(), nlevels, origlevels, zr, tr, qc
+    precomputed = data_store.get(p.uid(), 'icdclevelorder')
+    if precomputed:
+        return p.uid(), precomputed['nlevels'], precomputed['origlevels'], precomputed['zr'], precomputed['tr'], precomputed['qc']
 
     # Extract data and define the index for each level.
     z          = p.z()
@@ -105,17 +99,13 @@ def level_order(p, parameters):
         zr         = z
         tr         = t
 
-    # register pre-computed arrays in db for reuse    
-    origlevels_p = pickle.dumps(origlevels, -1)
-    zr_p = pickle.dumps(zr, -1)
-    tr_p = pickle.dumps(tr, -1)
-    qc_p = pickle.dumps(qc, -1)
-    
-    query = "REPLACE INTO icdclevelorder VALUES(?,?,?,?,?,?)"
-    main.dbinteract(query, [p.uid(), nlevels, sqlite3.Binary(origlevels_p), sqlite3.Binary(zr_p), sqlite3.Binary(tr_p), sqlite3.Binary(qc_p)], targetdb=parameters["db"])
+    # register pre-computed arrays in db for reuse
+    data_store.put(p.uid(), 'icdclevelorder', {'nlevels':nlevels, 'origlevels':origlevels, 'zr':zr, 'tr':tr, 'qc':qc})
 
     return p.uid(), nlevels, origlevels, zr, tr, qc
 
-def loadParameters(parameterStore):
+def prepare_data_store(data_store):
+    data_store.prepare('icdclevelorder', [{'name':'nlevels', 'type':'INTEGER'}, {'name':'origlevels', 'type':'BLOB'}, {'name':'zr', 'type':'BLOB'}, {'name':'tr', 'type':'BLOB'}, {'name':'qc', 'type':'BLOB'}])
 
-    main.dbinteract("CREATE TABLE IF NOT EXISTS icdclevelorder (uid INTEGER PRIMARY KEY, nlevels INTEGER, origlevels BLOB, zr BLOB, tr BLOB, qc BLOB)", targetdb=parameterStore["db"])
+def loadParameters(parameterStore):
+    pass

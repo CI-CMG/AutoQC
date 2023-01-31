@@ -4,7 +4,7 @@ Implements the impossible location test on page 6 of http://w3.jcommops.org/FTPR
 
 import numpy
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -24,3 +24,9 @@ def test(p, parameters):
         qc[:] = True
 
     return qc
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

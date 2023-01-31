@@ -1,7 +1,7 @@
 import numpy, xarray, scipy.io, time, matplotlib.path
 from util import obs_utils
 
-def test(p, parameters):
+def test(p, parameters, data_store):
 
     ## unpack profile data
     temp = p.t()
@@ -364,3 +364,9 @@ def val2index(VALs_orig,val_tab):
     index[numpy.isnan(VALs_orig)] = 'nan'
     index = numpy.reshape(index,VALs_size);
     return index
+
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass

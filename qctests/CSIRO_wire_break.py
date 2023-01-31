@@ -12,7 +12,7 @@ def istight(t, thresh=0.1):
     right = numpy.insert(gaps,0,0)
     return (left<thresh) & (right<thresh)
 
-def test(p, parameters):
+def test(p, parameters, data_store):
     """
     Runs the quality control check on profile p and returns a numpy array
     of quality control decisions with False where the data value has
@@ -42,3 +42,8 @@ def test(p, parameters):
     return qc
 
 
+def prepare_data_store(data_store):
+    pass
+
+def loadParameters(parameterStore):
+    pass
