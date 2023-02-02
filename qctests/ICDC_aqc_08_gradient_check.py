@@ -28,7 +28,7 @@ def test(p, parameters, data_store):
     parmaxover = 33.0
 
     # The test is run on re-ordered data.
-    nlevels, z, t = ICDC.reordered_data(p, parameters)
+    nlevels, z, t = ICDC.reordered_data(p, data_store)
     qc = np.zeros(nlevels, dtype=bool)
 
     # Calculate gradients and thresholds.
@@ -57,7 +57,7 @@ def test(p, parameters, data_store):
         qc[result] = True
         qc[result + 1] = True
 
-    return ICDC.revert_qc_order(p, qc, parameters)
+    return ICDC.revert_qc_order(p, qc, data_store)
 
 
 def prepare_data_store(data_store):

@@ -23,7 +23,7 @@ def test(p, parameters, data_store):
     '''Return a set of QC decisions. 
     '''
     
-    nlevels, z, t = ICDC.reordered_data(p, parameters)
+    nlevels, z, t = ICDC.reordered_data(p, data_store)
 
     qc = (t < parminover) | (t > parmaxover)
 
@@ -36,7 +36,7 @@ def test(p, parameters, data_store):
                   (zval <= zcrude1) & (zval >= zcrude2)):
             qc[i] = True 
 
-    return ICDC.revert_qc_order(p, qc, parameters)
+    return ICDC.revert_qc_order(p, qc, data_store)
 
 # Ranges:
 tcrude1 = np.array(

@@ -17,7 +17,6 @@ c/ PURPOSE:
 c    compare observed depths with unstrument type maximum observed depth
 '''
 
-from . import ICDC_aqc_01_level_order as ICDC
 import numpy as np
 from util.wod import wod_database
 

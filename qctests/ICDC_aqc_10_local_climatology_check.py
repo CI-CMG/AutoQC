@@ -202,6 +202,9 @@ def calcParameters(datfile, ncfile, parameterStore):
 
     nc.close()
 
+def prepare_data_store(data_store):
+    pass
+
 def loadParameters(parameterStore):
     datfile = 'data/global_mean_median_quartiles_medcouple_smoothed.dat'
     ncfile  = 'data/global_mean_median_quartiles_medcouple_smoothed.nc'
@@ -221,12 +224,6 @@ def loadParameters(parameterStore):
         datadict['fill_value'] = nc.variables['tmin_monthly']._FillValue
         parameterStore['icdc10'] = datadict
         nc.close()
-
-def prepare_data_store(data_store):
-    pass
-
-def loadParameters(parameterStore):
-    pass
 
 if __name__ == "__main__":
     # Generate the netCDF version of the data file.

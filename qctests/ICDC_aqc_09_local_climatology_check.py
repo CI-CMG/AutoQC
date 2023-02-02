@@ -38,7 +38,7 @@ def test(p, parameters, data_store):
     '''
     
     # The test is run on re-ordered data.
-    nlevels, z, t = ICDC.reordered_data(p, parameters)
+    nlevels, z, t = ICDC.reordered_data(p, data_store)
     
     # Define default QC.
     defaultqc = np.zeros(p.n_levels(), dtype=bool)
@@ -62,7 +62,7 @@ def test(p, parameters, data_store):
     tmin, tmax = ranges
     qc = ((t < tmin) | (t > tmax)) & (tmin != paramsicdc09['fillValue']) & (tmax != paramsicdc09['fillValue']) 
 
-    return ICDC.revert_qc_order(p, qc, parameters)
+    return ICDC.revert_qc_order(p, qc, data_store)
 
 def get_climatology_range(nlevels, z, lat, lon, month, paramsicdc09):
 

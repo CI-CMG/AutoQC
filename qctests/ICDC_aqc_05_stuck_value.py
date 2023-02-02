@@ -44,7 +44,7 @@ def test(p, parameters, data_store):
         return qc # Do not have the information to QC other types.
     
     # Check that we have the levels we need.
-    nlevels, z, t = ICDC.reordered_data(p, parameters)
+    nlevels, z, t = ICDC.reordered_data(p, data_store)
     if nlevels <= minlevs: return qc
     
     # Count stuck values.
@@ -63,7 +63,7 @@ def test(p, parameters, data_store):
         # If setting the QC flags we need to be careful about level order.
         qclo = qc[0:nlevels]
         qclo[i:i+n[i]] = True
-        qc = ICDC.revert_qc_order(p, qclo, parameters)
+        qc = ICDC.revert_qc_order(p, qclo, data_store)
 
     return qc
 
