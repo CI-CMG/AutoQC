@@ -4,11 +4,16 @@ from the EN quality control system,
 http://www.metoffice.gov.uk/hadobs/en3/OQCpaper.pdf
 """
 
-from cotede.qctests.possible_speed import haversine
 import datetime
 from . import EN_background_check, EN_constant_value_check, EN_increasing_depth_check, EN_range_check, EN_spike_and_step_check, EN_stability_check
 import util.main as main
 import numpy as np
+
+def get_or_calculate_enbackground(p, parameters, data_store):
+    enbackground = data_store.get(p.uid(), 'enbackground')
+    if not enbackground:
+        EN_background_check.test(p, parameters, data_store)
+    return data_store.get(p.uid(), 'enbackground')
 
 def test(p, parameters, data_store, allow_level_reinstating=True):
     """ 
@@ -25,7 +30,7 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
     qc = np.zeros(p.n_levels(), dtype=bool)
 
     # Obtain the obs minus background differences on standard levels.
-    result = stdLevelData(p, parameters)
+    result = stdLevelData(p, parameters, data_store)
     if result is None:
         return qc
 
@@ -33,31 +38,23 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
     levels, origLevels, assocLevels = result
     # Retrieve the background and observation error variances and
     # the background values.
-    query = 'SELECT bgstdlevels, bgevstdlevels FROM enbackground WHERE uid = ' + str(p.uid())
-    enbackground_pars = main.dbinteract(query, targetdb=parameters["db"])
-    enbackground_pars = main.unpack_row(enbackground_pars[0])
+    enbackground = get_or_calculate_enbackground(p, parameters, data_store)
 
-    bgsl = enbackground_pars[0]
+    bgsl = enbackground['bgstdlevels']
     slev = parameters['enbackground']['depth']
-    bgev = enbackground_pars[1]
+    bgev = enbackground['bgevstdlevels']
     obev = parameters['enbackground']['obev']
 
     #find initial pge
     pgeData = determine_pge(levels, bgev, obev, p)
 
     # Find buddy.
-    profiles = get_profile_info(parameters)
-    minDist  = 1000000000.0
-    iMinDist = None
-    for iProfile, profile in enumerate(profiles):
-        pDist = assessBuddyDistance(p, profile)
-        if pDist is not None and pDist < minDist:
-            minDist  = pDist
-            iMinDist = iProfile
+    buddy = parameters['buddy_finder'].find_buddy(p, 400000, parameters)
 
     # Check if we have found a buddy and process if so.
-    if minDist <= 400000:
-        pBuddy = main.get_profile_from_db(profiles[iMinDist][0], parameters['table'], parameters['db'])
+    if buddy:
+        pBuddy = buddy.profile
+        minDist = buddy.distance
 
         # buddy vetos
         Fail = False
@@ -70,12 +67,11 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
 
         if Fail == False:
 
-          result = stdLevelData(pBuddy, parameters)
+          result = stdLevelData(pBuddy, parameters, data_store)
 
-          query = 'SELECT bgevstdlevels FROM enbackground WHERE uid = ' + str(pBuddy.uid())
-          buddy_pars = main.dbinteract(query, targetdb=parameters["db"])
+          buddy_enbackground = get_or_calculate_enbackground(pBuddy, parameters, data_store)
 
-          buddy_pars = main.unpack_row(buddy_pars[0])
+          buddy_pars = buddy_enbackground['bgevstdlevels']
 
           if result is not None: 
             levelsBuddy, origLevelsBuddy, assocLevelsBuddy = result
@@ -222,7 +218,7 @@ def update_pgeData(pgeData, pgeBuddy, levels, levelsBuddy, minDist, profile, bud
 
     return pgeData
 
-def stdLevelData(p, parameters):
+def stdLevelData(p, parameters, data_store):
     """
     Combines data that have passed other QC checks to create a 
     set of observation minus background data on standard levels.
@@ -238,12 +234,10 @@ def stdLevelData(p, parameters):
 
     # Get the data stored by the EN background check.
     # As it was run above we know that the data is available in the db.
-    query = 'SELECT origlevels, ptlevels, bglevels FROM enbackground WHERE uid = ' + str(p.uid())
-    enbackground_pars = main.dbinteract(query, targetdb=parameters["db"])
-    enbackground_pars = main.unpack_row(enbackground_pars[0])
-    origlevels = enbackground_pars[0]
-    ptlevels = enbackground_pars[1]
-    bglevels = enbackground_pars[2]
+    enbackground = get_or_calculate_enbackground(p, parameters, data_store)
+    origlevels = enbackground['origlevels']
+    ptlevels = enbackground['ptlevels']
+    bglevels = enbackground['bglevels']
     origLevels = np.array(origlevels)
     diffLevels = (np.array(ptlevels) - np.array(bglevels))
     nLevels    = len(origLevels)
@@ -310,39 +304,7 @@ def meanDifferencesAtStandardLevels(origLevels, diffLevels, depths, parameters):
     return levels, assocLevs
 
 
-def assessBuddyDistance(p, buddy):
-    """
-    given a profile <p> and a possible buddy profile <buddy>,
-    return None if <buddy> is not a valid buddy, or the distance
-    to <p> if it is.
-    """
 
-    # Check that it is not the same profile and that they
-    # are near in time. The time criteria matches the EN 
-    # processing but would probably be better if it checked
-    # that the profiles were within a time threshold. The
-    # cruise is compared as two profiles from the same instrument
-    # should not be compared.
-    if (buddy[0] == p.uid() or
-        buddy[1] != p.year() or
-        buddy[2] != p.month() or
-        buddy[3] == p.cruise()): return None
-    lat = p.latitude()
-    lon = p.longitude()
-    latComp = buddy[4]
-    lonComp = buddy[5]
-    # Do a rough check of distance.
-    latDiff = np.abs(latComp - lat)
-    if latDiff > 5: return None
-    # Do a more detailed check of distance.
-    # Check in case they are either side of the edge of the map.
-    if np.abs(lonComp - lon) > 180:
-        if lonComp < lon:
-            lonComp += 360.0
-        else:
-            lonComp -= 360.0
-    # Calculate distance and return.
-    return haversine(lat, lon, latComp, lonComp)
 
 def timeDiff(p1, p2):
     '''
@@ -376,11 +338,7 @@ def timeDiff(p1, p2):
 
     return np.abs(diff.total_seconds())
 
-def get_profile_info(parameters):
-    # Gets information about the profiles from the database.
 
-    query = 'SELECT uid,year,month,cruise,lat,long FROM ' + parameters['table']
-    return main.dbinteract(query, targetdb=parameters["db"])
 
 def prepare_data_store(data_store):
     pass

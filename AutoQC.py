@@ -3,6 +3,8 @@ import pickle, sys, os, calendar, time, ast, getopt
 import numpy as np
 import util.main as main
 from multiprocessing import Pool
+
+from db_buddy_finder import DbBuddyFinder
 from .db_test_data_store import DbTestDataStore
 
 def run(test, profiles, parameters, data_store):
@@ -100,6 +102,7 @@ print('\nPlease wait while QC is performed\n')
 parameterStore = {
   "table": dbtable,
   "db": targetdb,
+  "buddy_finder": DbBuddyFinder()
 }
 
 data_store = DbTestDataStore(targetdb)
