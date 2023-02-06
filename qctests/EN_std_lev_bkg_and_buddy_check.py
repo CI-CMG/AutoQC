@@ -16,10 +16,10 @@ def get_or_calculate_enbackground(p, parameters, data_store):
     return data_store.get(p.uid(), 'enbackground')
 
 def test(p, parameters, data_store, allow_level_reinstating=True):
-    """ 
-    Runs the quality control check on profile p and returns a numpy array 
-    of quality control decisions with False where the data value has 
-    passed the check and True where it failed. 
+    """
+    Runs the quality control check on profile p and returns a numpy array
+    of quality control decisions with False where the data value has
+    passed the check and True where it failed.
 
     If allow_level_reinstating is set to True then rejected levels can be
     reprieved by comparing with levels above and below. NB this is done by
@@ -73,9 +73,9 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
 
           buddy_pars = buddy_enbackground['bgevstdlevels']
 
-          if result is not None: 
+          if result is not None:
             levelsBuddy, origLevelsBuddy, assocLevelsBuddy = result
-            bgevBuddy = buddy_pars[0]
+            bgevBuddy = buddy_pars
             pgeBuddy  = determine_pge(levels, bgevBuddy, obev, pBuddy)
             pgeData   = update_pgeData(pgeData, pgeBuddy, levels, levelsBuddy, minDist, p, pBuddy, obev, bgev, bgevBuddy)
 
@@ -99,13 +99,13 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
                     if stdLevelFlags[i + 1] == False and levels.mask[i + 1] == False and bgsl.mask[i + 1] == False:
                         okabove = True
                 # Work out tolerances.
-                if slev[i] > depthTol + 100: 
+                if slev[i] > depthTol + 100:
                     tolFactor = 0.5
                 elif slev[i] > depthTol:
                     tolFactor = 1.0 - 0.005 * (slev[i] - depthTol)
                 else:
                     tolFactor = 1.0
-                ttol = 0.5 * tolFactor 
+                ttol = 0.5 * tolFactor
                 if okbelow == True and okabove == True:
                     xmax = levels[i - 1] + bgsl[i - 1] + ttol
                     xmin = levels[i + 1] + bgsl[i + 1] - ttol
@@ -119,7 +119,7 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
                     continue
                 # Reassign PGE if level is within the tolerances.
                 if levels[i] + bgsl[i] >= xmin and levels[i] + bgsl[i] <= xmax:
-                    pgeData[i] = 0.49      
+                    pgeData[i] = 0.49
 
     # Assign the QC flags to original levels.
     for i, pge in enumerate(pgeData):
@@ -127,7 +127,7 @@ def test(p, parameters, data_store, allow_level_reinstating=True):
         if pge < 0.5: continue
         for j, assocLevel in enumerate(assocLevels):
             if assocLevel == i:
-                origLevel = origLevels[j]        
+                origLevel = origLevels[j]
                 qc[origLevel] = True
 
     return qc
@@ -165,19 +165,19 @@ def buddyCovariance(minDist, profile, buddyProfile, meso_ev_a, meso_ev_b, syn_ev
     meso_ev_a == mesoscale error variance for profile a, etc.
     '''
 
-    corScaleA = 100.0 # In km.             
+    corScaleA = 100.0 # In km.
     corScaleB = 400.0 # In km.
     corScaleT = 432000.0 # 5 days in secs.
     mesSDist  = minDist / (1000.0 * corScaleA)
     synSDist  = minDist / (1000.0 * corScaleB)
 
-    timeDiff2 = timeDiff(profile, buddyProfile) 
+    timeDiff2 = timeDiff(profile, buddyProfile)
     if timeDiff2 is None:
         return None
     timeDiff2 = (timeDiff2 / corScaleT)**2
 
     covar = (np.sqrt(meso_ev_a * meso_ev_b) *
-            (1.0 + mesSDist) * np.exp(-mesSDist - timeDiff2) + 
+            (1.0 + mesSDist) * np.exp(-mesSDist - timeDiff2) +
             np.sqrt(syn_ev_a * syn_ev_b) *
             (1.0 + synSDist) * np.exp(-synSDist - timeDiff2))
 
@@ -190,9 +190,9 @@ def update_pgeData(pgeData, pgeBuddy, levels, levelsBuddy, minDist, profile, bud
 
     for iLevel in range(len(levelsBuddy)):
         if levels.mask[iLevel] or levelsBuddy.mask[iLevel]: continue
-        
+
         # For simplicity, going to assume that length scales
-        # are isotropic and the same everywhere; in the EN 
+        # are isotropic and the same everywhere; in the EN
         # processing length scales are stretched in E/W direction
         # near the equator and this functionality could be added
         # later.
@@ -204,13 +204,13 @@ def update_pgeData(pgeData, pgeBuddy, levels, levelsBuddy, minDist, profile, bud
         errVarA = obev[iLevel] + bgev[iLevel]
         errVarB = obev[iLevel] + bgevBuddy[iLevel]
         rho2    = covar**2 / (errVarA * errVarB)
-        expArg  = (-(0.5 * rho2 / (1.0 - rho2)) *  
-                   (levels[iLevel]**2 / errVarA + 
-                    levelsBuddy[iLevel]**2 / errVarB - 
+        expArg  = (-(0.5 * rho2 / (1.0 - rho2)) *
+                   (levels[iLevel]**2 / errVarA +
+                    levelsBuddy[iLevel]**2 / errVarB -
                     2.0 * levels[iLevel] * levelsBuddy[iLevel] / covar))
         expArg  = -0.5 * np.log(1.0 - rho2) + expArg
         expArg  = min(80.0, max(-80.0, expArg))
-        Z       = 1.0 / (1.0 - (1.0 - pgeData[iLevel]) * 
+        Z       = 1.0 / (1.0 - (1.0 - pgeData[iLevel]) *
                          (1.0 - pgeBuddy[iLevel]) * (1.0 - expArg))
         if Z < 0.0: Z = 1.0 # In case of rounding errors.
         Z = Z**0.5
@@ -220,7 +220,7 @@ def update_pgeData(pgeData, pgeBuddy, levels, levelsBuddy, minDist, profile, bud
 
 def stdLevelData(p, parameters, data_store):
     """
-    Combines data that have passed other QC checks to create a 
+    Combines data that have passed other QC checks to create a
     set of observation minus background data on standard levels.
     """
 
@@ -275,17 +275,17 @@ def meanDifferencesAtStandardLevels(origLevels, diffLevels, depths, parameters):
     diffLevels: list of differences corresponding to origLevels
     depths: list of depths of all levels in profile.
     returns (levels, assocLevs), where
-    levels == a masked array of mean differences at each standard level 
-    assocLevs == a list of the indices of the closest standard levels to the levels indicated in origLevels 
+    levels == a masked array of mean differences at each standard level
+    assocLevs == a list of the indices of the closest standard levels to the levels indicated in origLevels
     '''
 
     # Get the set of standard levels.
     stdLevels = parameters['enbackground']['depth']
-    
+
     # Create arrays to hold the standard level data and aggregate.
     nStdLevels = len(stdLevels)
     levels     = np.zeros(nStdLevels)
-    nPerLev    = np.zeros(nStdLevels) 
+    nPerLev    = np.zeros(nStdLevels)
     assocLevs  = []
     for i, origLevel in enumerate(origLevels):
         # Find the closest standard level.
@@ -320,7 +320,7 @@ def timeDiff(p1, p2):
         if (year is None) or (month is None) or (day is None):
             return None
         if not (year > 0) or not (1 <= month <= 12) or not (1 <= day <= 31):
-            return None 
+            return None
         time  = prof.time()
         if time is None or time < 0 or time >= 24:
             hours   = 0
