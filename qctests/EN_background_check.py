@@ -65,7 +65,7 @@ def run_qc(p, parameters, data_store):
     # Remove missing data points.
     iOK = (clim.mask == False) & (bgev.mask == False)
     if np.count_nonzero(iOK) == 0:
-        record_parameters(p, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, parameters)
+        record_parameters(p, bgStdLevels, bgevStdLevels, origLevels, ptLevels, bgLevels, data_store)
         return qc
     clim = clim[iOK]
     bgev = bgev[iOK]
