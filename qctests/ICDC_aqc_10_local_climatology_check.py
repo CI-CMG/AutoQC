@@ -172,35 +172,34 @@ def calcParameters(datfile, ncfile, parameterStore):
     parameterStore['icdc10'] = datadict
 
     # Store parameters in a netCDF file.
-    nc = Dataset(ncfile, 'w')
+    with Dataset(ncfile, 'w') as nc:
 
-    latd = nc.createDimension('lat', nlat)
-    lond = nc.createDimension('lon', nlon)
-    dmnd = nc.createDimension('depthm', ndmn)
-    dand = nc.createDimension('deptha', ndan)
-    mond = nc.createDimension('month', 12)
+        latd = nc.createDimension('lat', nlat)
+        lond = nc.createDimension('lon', nlon)
+        dmnd = nc.createDimension('depthm', ndmn)
+        dand = nc.createDimension('deptha', ndan)
+        mond = nc.createDimension('month', 12)
 
-    latv = nc.createVariable('lat', 'f4', ('lat',))
-    lonv = nc.createVariable('lon', 'f4', ('lon',))
-    dmnv = nc.createVariable('depthm', 'f4', ('depthm',))
-    danv = nc.createVariable('deptha', 'f4', ('deptha',))
-    monv = nc.createVariable('month', 'i1', ('month',))
-    tlmv = nc.createVariable('tmin_monthly', 'f4', ('month', 'depthm', 'lat', 'lon'), fill_value=fillv)
-    tumv = nc.createVariable('tmax_monthly', 'f4', ('month', 'depthm', 'lat', 'lon'), fill_value=fillv)
-    tlav = nc.createVariable('tmin_annual', 'f4', ('deptha', 'lat', 'lon'), fill_value=fillv)
-    tuav = nc.createVariable('tmax_annual', 'f4', ('deptha', 'lat', 'lon'), fill_value=fillv)
+        latv = nc.createVariable('lat', 'f4', ('lat',))
+        lonv = nc.createVariable('lon', 'f4', ('lon',))
+        dmnv = nc.createVariable('depthm', 'f4', ('depthm',))
+        danv = nc.createVariable('deptha', 'f4', ('deptha',))
+        monv = nc.createVariable('month', 'i1', ('month',))
+        tlmv = nc.createVariable('tmin_monthly', 'f4', ('month', 'depthm', 'lat', 'lon'), fill_value=fillv)
+        tumv = nc.createVariable('tmax_monthly', 'f4', ('month', 'depthm', 'lat', 'lon'), fill_value=fillv)
+        tlav = nc.createVariable('tmin_annual', 'f4', ('deptha', 'lat', 'lon'), fill_value=fillv)
+        tuav = nc.createVariable('tmax_annual', 'f4', ('deptha', 'lat', 'lon'), fill_value=fillv)
 
-    latv[:] = lats
-    lonv[:] = lons
-    dmnv[:] = depths[0:ndmn]
-    danv[:] = depths
-    monv[:] = range(1, 13)
-    tlmv[:, :, :, :] = tmin_monthly
-    tumv[:, :, :, :] = tmax_monthly
-    tlav[:, :, :] = tmin_annual
-    tuav[:, :, :] = tmax_annual
+        latv[:] = lats
+        lonv[:] = lons
+        dmnv[:] = depths[0:ndmn]
+        danv[:] = depths
+        monv[:] = range(1, 13)
+        tlmv[:, :, :, :] = tmin_monthly
+        tumv[:, :, :, :] = tmax_monthly
+        tlav[:, :, :] = tmin_annual
+        tuav[:, :, :] = tmax_annual
 
-    nc.close()
 
 def prepare_data_store(data_store):
     pass
@@ -211,19 +210,18 @@ def loadParameters(parameterStore):
     if os.path.isfile(ncfile) is False:
         calcParameters(datfile, ncfile, parameterStore)
     else:
-        nc = Dataset(ncfile)
         datadict = {}
-        datadict['tmin_monthly'] = nc.variables['tmin_monthly'][:, :, :, :].data
-        datadict['tmax_monthly'] = nc.variables['tmax_monthly'][:, :, :, :].data
-        datadict['tmin_annual'] = nc.variables['tmin_annual'][:, :, :].data
-        datadict['tmax_annual'] = nc.variables['tmax_annual'][:, :, :].data
-        datadict['lats'] = nc.variables['lat'][:]
-        datadict['lons'] = nc.variables['lon'][:]
-        datadict['depths_monthly'] = nc.variables['depthm'][:]
-        datadict['depths_annual'] = nc.variables['deptha'][:]
-        datadict['fill_value'] = nc.variables['tmin_monthly']._FillValue
+        with Dataset(ncfile) as nc:
+            datadict['tmin_monthly'] = nc.variables['tmin_monthly'][:, :, :, :].data
+            datadict['tmax_monthly'] = nc.variables['tmax_monthly'][:, :, :, :].data
+            datadict['tmin_annual'] = nc.variables['tmin_annual'][:, :, :].data
+            datadict['tmax_annual'] = nc.variables['tmax_annual'][:, :, :].data
+            datadict['lats'] = nc.variables['lat'][:]
+            datadict['lons'] = nc.variables['lon'][:]
+            datadict['depths_monthly'] = nc.variables['depthm'][:]
+            datadict['depths_annual'] = nc.variables['deptha'][:]
+            datadict['fill_value'] = nc.variables['tmin_monthly']._FillValue
         parameterStore['icdc10'] = datadict
-        nc.close()
 
 if __name__ == "__main__":
     # Generate the netCDF version of the data file.

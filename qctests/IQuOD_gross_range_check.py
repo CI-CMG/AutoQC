@@ -2,7 +2,6 @@
 Implements a global range check used to filter out very obvious errors.
 """
 
-from util import obs_utils
 
 def test(p, parameters, data_store):
     """ 

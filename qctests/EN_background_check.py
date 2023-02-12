@@ -190,15 +190,15 @@ def readENBackgroundCheckAux():
     '''
 
     filename = 'data/EN_bgcheck_info.nc'
-    nc = Dataset(filename)
     data = {}
-    data['lon']   = nc.variables['longitude'][:]
-    data['lat']   = nc.variables['latitude'][:]
-    data['depth'] = nc.variables['depth'][:]
-    data['month'] = nc.variables['month'][:]
-    data['clim']  = nc.variables['potm_climatology'][:]
-    data['bgev']  = nc.variables['bg_err_var'][:]
-    data['obev']  = nc.variables['ob_err_var'][:]
+    with Dataset(filename) as nc:
+        data['lon']   = nc.variables['longitude'][:]
+        data['lat']   = nc.variables['latitude'][:]
+        data['depth'] = nc.variables['depth'][:]
+        data['month'] = nc.variables['month'][:]
+        data['clim']  = nc.variables['potm_climatology'][:]
+        data['bgev']  = nc.variables['bg_err_var'][:]
+        data['obev']  = nc.variables['ob_err_var'][:]
 
     return data
 

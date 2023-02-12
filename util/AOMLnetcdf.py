@@ -29,9 +29,12 @@ def subset_data(x, y, netcdFile, cScope, clima, fieldType):
       measurements, list of lists with temperatures, timestamp in netCDF
     Return empty list, an empty list, an empty list, -1 if exception
   """
+  with Dataset(netcdFile, "r") as nf:
+    latLonTemp, deps, latLonList, time = subset_data_with_dataset(x, y, nf, cScope, clima, fieldType)
+    return latLonTemp, deps, latLonList, time
 
-  nf = Dataset(netcdFile, "r")
-    
+def subset_data_with_dataset(x, y, nf, cScope, clima, fieldType):
+
   if clima:
     time = nf.variables["time"][0]
     deps = nf.variables["depth"][:]
@@ -52,7 +55,7 @@ def subset_data(x, y, netcdFile, cScope, clima, fieldType):
   latLonList = []
   latLonTemp = []
   latLonList, latLonTemp = lon_lat_temp_lists(nf, minIndexLat, maxIndexLat, minIndexLon, maxIndexLon, len(deps), lats, lons, temperatureType)
-  nf.close()
+
   return latLonTemp, deps, latLonList, time
 
 def lon_lat_temp_lists(netFile, minIndexLat, maxIndexLat, minIndexLon,

@@ -19,8 +19,7 @@ c    if necessary to bring the original levels to increasing order
 '''
 
 import numpy as np
-import util.main as main
-import pickle, io
+
 
 def test(p, parameters, data_store):
     '''Return a set of QC decisions. This corresponds to levels with

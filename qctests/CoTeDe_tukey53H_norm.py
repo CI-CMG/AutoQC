@@ -1,5 +1,5 @@
 from cotede_qc.cotede_test import get_qc
-import numpy
+
 
 def test(p, parameters, data_store):
     '''Run the tukey53H norm QC from the CoTeDe config.'''

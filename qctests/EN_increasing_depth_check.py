@@ -2,11 +2,13 @@
 Implements the EN increasing depth check.
 """
 
-from . import EN_spike_and_step_check
-import numpy as np
 from collections import Counter
-import util.main as main
+
+import numpy as np
+
 from util.dbutils import retrieve_existing_qc_result
+from . import EN_spike_and_step_check
+
 
 def test(p, parameters, data_store):
     """

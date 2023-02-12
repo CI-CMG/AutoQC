@@ -2,7 +2,6 @@
 #
 # Author: Patrick Halsall
 
-import sys
 import numpy as np
 from scipy import interpolate, spatial
 

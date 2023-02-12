@@ -1,5 +1,5 @@
 from cotede_qc.cotede_test import get_qc
-import numpy
+
 
 def test(p, parameters, data_store):
     '''Run the global range QC from the CoTeDe GTSPP config.'''

@@ -3,10 +3,13 @@ Implements the EN track check, described on pp 7 and 21 of
 http://www.metoffice.gov.uk/hadobs/en3/OQCpaper.pdf
 """
 
+import copy
+import math
+
 import numpy as np
-import util.main as main
+
 import util.geo as geo
-import copy, datetime, math, sys, calendar, sqlite3
+import util.main as main
 
 # module constants
 DistRes = 20000. # meters

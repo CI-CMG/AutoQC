@@ -1,5 +1,5 @@
 from cotede_qc.cotede_test import get_qc
-import numpy
+
 
 def test(p, parameters, data_store):
     '''Run the profile_envelop QC from the CoTeDe config.'''

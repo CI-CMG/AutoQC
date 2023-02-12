@@ -27,11 +27,11 @@ c     tminlocal(k)=tmedian(k) - rnumamd*tamd(k)
 c     tmaxlocal(k)=tmedian(k) + rnumamd*tamd(k)
 '''
 
-from . import ICDC_aqc_01_level_order as ICDC
-from netCDF4 import Dataset
 import numpy as np
-import os
-import time
+from netCDF4 import Dataset
+
+from . import ICDC_aqc_01_level_order as ICDC
+
 
 def test(p, parameters, data_store):
     '''Return quality control decisions.
@@ -131,13 +131,12 @@ def prepare_data_store(data_store):
 
 def loadParameters(parameterStore):
     datadict = {}
-    nc = Dataset('data/climatological_t_median_and_amd_for_aqc.nc', 'r')
-    datadict['zedqc'] = nc.variables['zedqc'][:]    
-    datadict['tamdM'] = nc.variables['tamdM'][:]
-    datadict['tmedM'] = nc.variables['tmedM'][:]
-    datadict['tamdA'] = nc.variables['tamdA'][:]
-    datadict['tmedA'] = nc.variables['tmedA'][:]
-    datadict['fillValue'] = nc.fillValue
-    nc.close()
+    with Dataset('data/climatological_t_median_and_amd_for_aqc.nc', 'r') as nc:
+        datadict['zedqc'] = nc.variables['zedqc'][:]
+        datadict['tamdM'] = nc.variables['tamdM'][:]
+        datadict['tmedM'] = nc.variables['tmedM'][:]
+        datadict['tamdA'] = nc.variables['tamdA'][:]
+        datadict['tmedA'] = nc.variables['tmedA'][:]
+        datadict['fillValue'] = nc.fillValue
     parameterStore['icdc09'] = datadict
 

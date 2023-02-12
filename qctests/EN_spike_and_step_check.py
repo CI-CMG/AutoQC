@@ -9,7 +9,7 @@ remove these elements and include them within the background check code.
 """
 
 import numpy as np
-import util.main as main
+
 
 def test(p, parameters, data_store, suspect=False):
     """ 

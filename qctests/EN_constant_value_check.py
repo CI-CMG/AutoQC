@@ -4,8 +4,9 @@ system, described on page 7 of http://www.metoffice.gov.uk/hadobs/en3/OQCpaper.p
 """
 
 import numpy
-import util.main as main
+
 from util.dbutils import retrieve_existing_qc_result
+
 
 def test(p, parameters, data_store):
     """ 

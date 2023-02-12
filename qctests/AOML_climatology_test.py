@@ -4,6 +4,7 @@
 import sys, numpy
 import util.AOMLinterpolation as interp_helper
 import util.AOMLnetcdf as read_netcdf
+from netCDF4 import Dataset
 
 def test(p, parameters, data_store):
     qc = numpy.zeros(p.n_levels(), dtype=bool)
@@ -14,8 +15,8 @@ def test(p, parameters, data_store):
     isData = isTemperature & isDepth
 
     # extract climatology data
-    lonlatWithTempsList1, depthColumns1, latLonsList1 = subset_climatology_data(p.longitude(), p.latitude(), "analyzed mean")
-    lonlatWithTempsList2, depthColumns2, latLonsList2 = subset_climatology_data(p.longitude(), p.latitude(), "standard deviations")
+    lonlatWithTempsList1, depthColumns1, latLonsList1 = subset_climatology_data(p.longitude(), p.latitude(), "analyzed mean", parameters)
+    lonlatWithTempsList2, depthColumns2, latLonsList2 = subset_climatology_data(p.longitude(), p.latitude(), "standard deviations", parameters)
 
     for i in range(p.n_levels()):
 
@@ -51,7 +52,7 @@ def climatology_check(temperature, interpMNTemp, interpSDTemp, sigmaFactor=5.0):
   else:
     return 4
 
-def subset_climatology_data(longitude, latitude, statType, coordRange=1, filePathName='data/woa13_00_025.nc'):
+def subset_climatology_data(longitude, latitude, statType, parameters, coordRange=1):
   """
     longitude: float
     latitude: float
@@ -76,7 +77,7 @@ def subset_climatology_data(longitude, latitude, statType, coordRange=1, filePat
                      "field as " + statType + "\n")
     return [], [], []
 
-  latLonDepthTempList, depthColumns, latLonList, time = read_netcdf.subset_data(longitude, latitude, filePathName, coordRange, True, fieldType)
+  latLonDepthTempList, depthColumns, latLonList, time = read_netcdf.subset_data_with_dataset(longitude, latitude, parameters['woa13_00_025.nc'], coordRange, True, fieldType)
 
   return latLonDepthTempList, depthColumns, latLonList
 
@@ -84,4 +85,8 @@ def prepare_data_store(data_store):
     pass
 
 def loadParameters(parameterStore):
-  pass
+
+  # Purposely opening this NetCDF file and not closing it as a workaround for a memory leak.
+  # https://github.com/Unidata/netcdf4-python/issues/1021
+  # Previously this file was repeatedly opened and closed which caused memory to be exhausted.
+  parameterStore['woa13_00_025.nc'] = Dataset('data/woa13_00_025.nc', "r")
