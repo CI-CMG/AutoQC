@@ -1,4 +1,4 @@
-from cotede_qc.cotede_test import get_qc
+from cotede_qc.cotede_test import get_qc, load_parameters
 
 
 def test(p, parameters, data_store):
@@ -7,7 +7,7 @@ def test(p, parameters, data_store):
     config   = 'argo'
     testname = 'density_inversion'
 
-    qc = get_qc(p, config, testname)
+    qc = get_qc(p, config, testname, parameters)
 
     return qc
 
@@ -15,4 +15,4 @@ def prepare_data_store(data_store):
     pass
 
 def loadParameters(parameterStore):
-    pass
+    load_parameters(parameterStore)

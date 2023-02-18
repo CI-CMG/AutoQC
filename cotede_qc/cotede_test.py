@@ -1,16 +1,27 @@
-from cotede.qc import ProfileQC
-from cotede.utils import load_cfg
-import datetime
 import json
 import logging
+
 import numpy as np
+from cotede.qc import ProfileQC
+from cotede.utils import load_cfg
+from oceansdb import ETOPO, CARS, WOA
 from wodpy.extra import Wod4CoTeDe
+
 
 '''Runs QC tests from the CoTeDe package.
    CoTeDe (https://github.com/castelao/CoTeDe) is copyright (c) 2011-2015, Guilherme Pimenta Castelao.
 '''
 
-def get_qc(p, config, test):
+def load_parameters(parameters):
+    # Purposely opening these NetCDF resource and not closing them as a workaround for a memory leak.
+    # https://github.com/Unidata/netcdf4-python/issues/1021
+    if not parameters.get('cars_db'):
+        parameters['etopo_dbs'] = {'5min': ETOPO('5min')}
+        parameters['cars_db'] = CARS()
+        parameters['woa_db'] = WOA()
+
+
+def get_qc(p, config, test, parameters):
     '''Wrapper for running and returning results of CoTeDe tests.
        Inputs are:
          p is a wodpy profile object.
@@ -18,17 +29,15 @@ def get_qc(p, config, test):
          test is the specific test to get the results from.
     '''
 
-    global cotede_results
+    cars_db = parameters['cars_db']
+    woa_db = parameters['woa_db']
+    etopo_dbs = parameters['etopo_dbs']
+
+    cotede_results = [-1, '', {}, None]
 
     # Disable logging messages from CoTeDe unless they are more
     # severe than a warning.
-    logging.disable(logging.WARNING)
-
-    # Create a dummy results variable if this is the first call.
-    try:
-        cotede_results
-    except NameError:
-        cotede_results = [-1, '', {}, None]
+    logging.getLogger("cotede").setLevel(logging.WARNING)
 
     var = 'TEMP'
 
@@ -63,7 +72,7 @@ def get_qc(p, config, test):
             with open('cotede_qc/qc_cfg/' + config + '.json') as f:
                 cfg = json.load(f)
 
-        pqc = ProfileQC(inputs, cfg=cfg)
+        pqc = ProfileQC(inputs, cfg=cfg, cars_db=cars_db, woa_db=woa_db, etopo_dbs=etopo_dbs)
 
         cotede_results = [p.uid(), config, pqc.flags[var].keys(), pqc]
 

@@ -1,6 +1,5 @@
 """A collection of utilities for handling (mainly subsurface ocean) observations"""
 
-import copy
 import gsw
 import numpy as np
 

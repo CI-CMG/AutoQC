@@ -199,7 +199,7 @@ def update_pgeData(pgeData, pgeBuddy, levels, levelsBuddy, minDist, profile, bud
 
         covar = buddyCovariance(minDist, profile, buddyProfile, bgev[iLevel]/2.0, bgevBuddy[iLevel]/2.0, bgev[iLevel]/2.0, bgevBuddy[iLevel]/2.0)
         if covar is None:
-            continue;
+            continue
 
         errVarA = obev[iLevel] + bgev[iLevel]
         errVarB = obev[iLevel] + bgevBuddy[iLevel]
