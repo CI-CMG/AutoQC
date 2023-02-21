@@ -16,14 +16,14 @@ class TestClass:
     qctests.EN_background_check.loadParameters(parameters)
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
         main.faketable('unit')
         main.fakerow('unit')
         # need to re-do this every time to refresh the enspikeandstep table
         qctests.EN_spike_and_step_check.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE unit;')
 
     def test_EN_background_check_temperature(self):
@@ -31,7 +31,8 @@ class TestClass:
         Make sure EN_background_check is flagging temperature excursions
         '''
 
-        p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 7.1], [0.0, 2.5, 5.0, 7.5], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7, uid=8888) 
+        p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 7.1], [0.0, 2.5, 5.0, 7.5], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7, uid=8888)
+        qctests.EN_background_check.prepare_data_store(self.data_store)
         qc = qctests.EN_background_check.test(p, self.parameters, self.data_store)
         expected = [False, False, False, True]
         assert numpy.array_equal(qc, expected), 'mismatch between qc results and expected values'

@@ -9,7 +9,6 @@ import numpy as np
 import util.obs_utils as outils
 from netCDF4 import Dataset
 import util.main as main
-from util.dbutils import retrieve_existing_qc_result
 
 def test(p, parameters, data_store):
     """
@@ -21,19 +20,15 @@ def test(p, parameters, data_store):
     # Check if the QC of this profile was already done and if not
     # run the QC.
     qc_log = None
-    if parameters.get('cache_test_in_store'):
-        qc_log = data_store.get(p.uid(), 'en_background_check')
-    else:
-        qc_log = retrieve_existing_qc_result('en_background_check',
-                                         p.uid(),
-                                         parameters['table'], 
-                                         parameters['db'])
+    cached = data_store.get(p.uid(), 'en_background_check')
+    if cached:
+        qc_log = cached['qc_log']
+
     if qc_log is not None:
         return qc_log
 
     qc_log = run_qc(p, parameters, data_store)
-    if parameters.get('cache_test_in_store'):
-        data_store.put(p.uid(), 'en_background_check', qc_log)
+    data_store.put(p.uid(), 'en_background_check', {'qc_log':qc_log})
     return qc_log
 
 def run_qc(p, parameters, data_store):
@@ -204,6 +199,8 @@ def readENBackgroundCheckAux():
 
 def prepare_data_store(data_store):
     data_store.prepare('enbackground', [{'name':'bgstdlevels', 'type':'BLOB'}, {'name':'bgevstdlevels', 'type':'BLOB'}, {'name':'origlevels', 'type':'BLOB'}, {'name':'ptlevels', 'type':'BLOB'}, {'name':'bglevels', 'type':'BLOB'}])
+    data_store.prepare('en_background_check', [{'name':'qc_log', 'type':'BLOB'}])
+
 
 def loadParameters(parameterStore):
     parameterStore['enbackground'] = readENBackgroundCheckAux()

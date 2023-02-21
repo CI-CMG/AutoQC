@@ -19,11 +19,11 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_crude_range(self):
@@ -41,6 +41,7 @@ class TestClass:
 
             qctruth = f > 0
             p = util.testingProfile.fakeProfile(t, z, uid=i)
+            ICDC_crude_range.prepare_data_store(self.data_store)
             qc = ICDC_crude_range.test(p, self.parameters, self.data_store)
 
             assert np.array_equal(qc, qctruth), 'Example {} failed'.format(i + 1)

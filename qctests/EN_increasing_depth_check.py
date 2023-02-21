@@ -6,7 +6,6 @@ from collections import Counter
 
 import numpy as np
 
-from util.dbutils import retrieve_existing_qc_result
 from . import EN_spike_and_step_check
 
 
@@ -20,19 +19,15 @@ def test(p, parameters, data_store):
     # Check if the QC of this profile was already done and if not
     # run the QC.
     qc_log = None
-    if parameters.get('cache_test_in_store'):
-        qc_log = data_store.get(p.uid(), 'en_increasing_depth_check')
-    else:
-        qc_log = retrieve_existing_qc_result('en_increasing_depth_check',
-                                             p.uid(),
-                                             parameters['table'],
-                                             parameters['db'])
+    cached = data_store.get(p.uid(), 'en_increasing_depth_check')
+    if cached:
+        qc_log = cached['qc_log']
+
     if qc_log is not None:
         return qc_log
 
     qc_log = run_qc(p, parameters, data_store)
-    if parameters.get('cache_test_in_store'):
-        data_store.put(p.uid(), 'en_increasing_depth_check', qc_log)
+    data_store.put(p.uid(), 'en_increasing_depth_check', {'qc_log':qc_log})
     return qc_log
 
 def mask_index(mat, index):
@@ -134,7 +129,7 @@ def run_qc(p, parameters, data_store):
     return qc
 
 def prepare_data_store(data_store):
-    pass
+    data_store.prepare('en_increasing_depth_check', [{'name':'qc_log', 'type':'BLOB'}])
 
 def loadParameters(parameterStore):
     pass

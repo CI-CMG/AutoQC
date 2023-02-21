@@ -18,12 +18,12 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
         ICDC_lc.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_local_climatology_check(self):
@@ -75,6 +75,7 @@ class TestClass:
                 assert np.max(np.abs(tmin - climmin)) < 0.001, 'TMIN failed for profile with header ' + line
                 assert np.max(np.abs(tmax - climmax)) < 0.001, 'TMAX failed for profile with header ' + line
 
+                ICDC_lc.prepare_data_store(self.data_store)
                 qc = ICDC_lc.test(p, self.parameters, self.data_store)
                 assert np.array_equal(qc, qctruth), 'QC failed profile with header ' + line
 

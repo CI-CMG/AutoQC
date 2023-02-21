@@ -4,6 +4,7 @@ http://www.metoffice.gov.uk/hadobs/en3/OQCpaper.pdf
 """
 
 import math
+
 import numpy
 
 from util.dbutils import retrieve_existing_qc_result
@@ -19,19 +20,15 @@ def test(p, parameters, data_store):
     # Check if the QC of this profile was already done and if not
     # run the QC.
     qc_log = None
-    if parameters.get('cache_test_in_store'):
-        qc_log = data_store.get(p.uid(), 'en_stability_check')
-    else:
-        qc_log = retrieve_existing_qc_result('en_stability_check',
-                                             p.uid(),
-                                             parameters['table'],
-                                             parameters['db'])
+    cached = data_store.get(p.uid(), 'en_stability_check')
+    if cached:
+        qc_log = cached['qc_log']
+
     if qc_log is not None:
         return qc_log
 
     qc_log = run_qc(p, parameters)
-    if parameters.get('cache_test_in_store'):
-        data_store.put(p.uid(), 'en_stability_check', qc_log)
+    data_store.put(p.uid(), 'en_stability_check', {'qc_log':qc_log})
     return qc_log
 
 def run_qc(p, parameters):
@@ -185,7 +182,7 @@ def potentialTemperature(S, T, p):
     return T + p*poly
 
 def prepare_data_store(data_store):
-    pass
+    data_store.prepare('en_stability_check', [{'name':'qc_log', 'type':'BLOB'}])
 
 def loadParameters(parameterStore):
     pass

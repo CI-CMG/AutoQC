@@ -1,3 +1,5 @@
+import sqlite3
+
 from test_data_store import TestDataStore
 import util.main as main
 
@@ -14,7 +16,7 @@ class DbTestDataStore(TestDataStore):
   def prepare(self, key, field_list):
     sql = "CREATE TABLE IF NOT EXISTS " + key + " (uid INTEGER PRIMARY KEY"
     for field in field_list:
-      sql = ", " + field.name + " " + field.type
+      sql = sql + ", " + field['name'] + " " + field['type']
     sql = sql + ")"
     main.dbinteract(sql, targetdb=self.__db)
     self.__model[key] = field_list
@@ -24,25 +26,29 @@ class DbTestDataStore(TestDataStore):
     parameters = [uid]
     for field in self.__model[key]:
       placeholders.append("?")
-      if field.type == 'BLOB':
-        parameters.append(sqlite3.Binary(main.pack_array(field_dict[field.name])))
+      if field['type'] == 'BLOB':
+        parameters.append(sqlite3.Binary(main.pack_array(field_dict[field['name']])))
       else:
-        parameters.append(field_dict[field.name])
+        parameters.append(field_dict[field['name']])
     sql = "REPLACE INTO " + key + " VALUES(" + (",".join(placeholders)) + ")"
-    main.dbinteract(query, parameters, targetdb=self.__db)
+    main.dbinteract(sql, parameters, targetdb=self.__db)
 
 
   def get(self, uid, key):
-    sql = "SELECT " + (", ".join(self.__model[key])) + " FROM " + key + " WHERE uid = ?"
-    db_result = main.dbinteract(query, [uid], targetdb=self.__db)
-    if len(db_result) > 0:
+    field_list = self.__model[key]
+    field_names = []
+    for field in field_list:
+      field_names.append(field['name'])
+    sql = "SELECT " + (", ".join(field_names)) + " FROM " + key + " WHERE uid = ?"
+    db_result = main.dbinteract(sql, [uid], targetdb=self.__db)
+    if db_result is not None and len(db_result) > 0:
       field_dict = {}
       i = 0
-      for field in self.__model[key]:
-        if field.type == 'BLOB':
-          field_dict[field.name] = main.unpack_row(db_result[0][i])
+      for field in field_list:
+        if field['type'] == 'BLOB':
+          field_dict[field['name']] = main.unpack_row(db_result[0][i])
         else:
-          field_dict[field.name] = db_result[0][i]
+          field_dict[field['name']] = db_result[0][i]
         i += 1
       return field_dict
     return None

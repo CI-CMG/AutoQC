@@ -19,11 +19,11 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_max_obs_level(self):
@@ -48,6 +48,7 @@ class TestClass:
                 
                 p  = util.testingProfile.fakeProfile(depths, depths, probe_type=probe_type)
                 p.primary_header['Country code'] = 'JP'
+                ICDC_mol.prepare_data_store(self.data_store)
                 qc = ICDC_mol.test(p, self.parameters, self.data_store)
            
                 assert np.array_equal(qc, qctruth), 'Failed profile with header ' + line

@@ -18,11 +18,11 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_spike_check(self):
@@ -46,6 +46,7 @@ class TestClass:
                     qctruth.append(int(d[2]) > 0)
                 
                 p  = util.testingProfile.fakeProfile(temps, depths, uid=i)
+                ICDC_sc.prepare_data_store(self.data_store)
                 qc = ICDC_sc.test(p, self.parameters, self.data_store)
 
                 assert np.array_equal(qc, qctruth), 'Failed profile with header ' + line

@@ -16,17 +16,19 @@ class TestClass():
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         pass
 
     def test_ICDC_10_local_climatology_check_locs(self):
         '''Make sure code processes locations as expected.
         '''
-        p = util.testingProfile.fakeProfile([-5, -5, -5], [1, 2, 5], latitude=-80.0, longitude=0.0) 
+        ICDC.prepare_data_store(self.data_store)
+
+        p = util.testingProfile.fakeProfile([-5, -5, -5], [1, 2, 5], latitude=-80.0, longitude=0.0)
         qc = ICDC.test(p, self.parameters, self.data_store)
         truth = np.zeros(3, dtype=bool)
         assert np.array_equal(qc, truth), 'Latitude -80.0 outside grid range and should not have flagged data'    

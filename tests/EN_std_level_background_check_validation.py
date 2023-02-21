@@ -43,7 +43,7 @@ class TestClass:
     qctests.EN_background_check.loadParameters(parameters)
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
         main.faketable('unit')
         main.fakerow('unit')
@@ -52,7 +52,7 @@ class TestClass:
         # need to re-do this every time to refresh the enspikeandstep table
         qctests.EN_spike_and_step_check.loadParameters(self.parameters)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE unit;')
         main.catchFlags = realcatchflagsfunc
         main.get_profile_from_db = realgetproffunc
@@ -62,7 +62,15 @@ class TestClass:
         Make sure EN_std_level_background_check is flagging temperature excursions
         '''
 
-        p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 7.1], [0.0, 2.5, 5.0, 7.5], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7, uid=8888) 
+        p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 7.1], [0.0, 2.5, 5.0, 7.5], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7, uid=8888)
+        qctests.EN_std_lev_bkg_and_buddy_check.prepare_data_store(self.data_store)
+        qctests.EN_background_check.prepare_data_store(self.data_store)
+        qctests.EN_constant_value_check.prepare_data_store(self.data_store)
+        qctests.EN_increasing_depth_check.prepare_data_store(self.data_store)
+        qctests.EN_range_check.prepare_data_store(self.data_store)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
+        qctests.EN_stability_check.prepare_data_store(self.data_store)
+
         qc = qctests.EN_std_lev_bkg_and_buddy_check.test(p, self.parameters, self.data_store)
         expected = [False, False, False, False]
         assert numpy.array_equal(qc, expected), 'mismatch between qc results and expected values'
@@ -77,6 +85,16 @@ class TestClass:
         levels.mask = False
 
         #bgev = qctests.EN_background_check.bgevStdLevels
+
+        qctests.EN_std_lev_bkg_and_buddy_check.prepare_data_store(self.data_store)
+        qctests.EN_background_check.prepare_data_store(self.data_store)
+        qctests.EN_constant_value_check.prepare_data_store(self.data_store)
+        qctests.EN_increasing_depth_check.prepare_data_store(self.data_store)
+        qctests.EN_range_check.prepare_data_store(self.data_store)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
+        qctests.EN_stability_check.prepare_data_store(self.data_store)
+
+
         qctests.EN_background_check.test(p, self.parameters, self.data_store) #need to populate the enbackground db with profile specific info
         query = 'SELECT bgevstdlevels FROM enbackground WHERE uid = 8888'
         enbackground_pars = main.dbinteract(query) 
@@ -224,6 +242,16 @@ class TestClass:
         '''
 
         main.fakerow('unit', raw='x', truth=0, uid=1, year=2000, month=1, day=15, time=12, lat=-39.889, longitude=17.650000, cruise=1, probe=2)
+
+        qctests.EN_std_lev_bkg_and_buddy_check.prepare_data_store(self.data_store)
+        qctests.EN_background_check.prepare_data_store(self.data_store)
+        qctests.EN_constant_value_check.prepare_data_store(self.data_store)
+        qctests.EN_increasing_depth_check.prepare_data_store(self.data_store)
+        qctests.EN_range_check.prepare_data_store(self.data_store)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
+        qctests.EN_stability_check.prepare_data_store(self.data_store)
+
+
         qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile1, self.parameters, self.data_store)
 
         assert numpy.array_equal(qc, truthQC1), 'mismatch between qc results and expected values'
@@ -235,6 +263,15 @@ class TestClass:
 
         main.fakerow('unit', raw='x', truth=0, uid=2, year=2000, month=1, day=10, time=0, lat=-30.229, longitude=2.658, cruise=2, probe=2)
         main.fakerow('unit', raw='x', truth=0, uid=3, year=2000, month=1, day=10, time=0.1895833, lat=-28.36, longitude=-0.752, cruise=3, probe=2)
+
+        qctests.EN_std_lev_bkg_and_buddy_check.prepare_data_store(self.data_store)
+        qctests.EN_background_check.prepare_data_store(self.data_store)
+        qctests.EN_constant_value_check.prepare_data_store(self.data_store)
+        qctests.EN_increasing_depth_check.prepare_data_store(self.data_store)
+        qctests.EN_range_check.prepare_data_store(self.data_store)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
+        qctests.EN_stability_check.prepare_data_store(self.data_store)
+
         qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile2, self.parameters, self.data_store, allow_level_reinstating=False)
 
         assert numpy.array_equal(qc, truthQC2), 'mismatch between qc results and expected values'
@@ -246,6 +283,7 @@ class TestClass:
 
         main.fakerow('unit', raw='x', truth=0, uid=2, year=2000, month=1, day=10, time=0, lat=-30.229, longitude=2.658, cruise=2, probe=2)
         main.fakerow('unit', raw='x', truth=0, uid=3, year=2000, month=1, day=10, time=0.1895833, lat=-28.36, longitude=-0.752, cruise=3, probe=2)
+        qctests.EN_std_lev_bkg_and_buddy_check.prepare_data_store(self.data_store)
         qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile2, self.parameters, self.data_store)
         assert numpy.all(qc == False), 'mismatch between qc results and expected values'
 

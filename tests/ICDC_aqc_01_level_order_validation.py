@@ -18,12 +18,12 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
         ICDC.prepare_data_store(self.data_store)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_level_order_simple(self):
@@ -32,6 +32,7 @@ class TestClass:
         p = util.testingProfile.fakeProfile([1.0, 2.0, 3.0],
                                             [2.0, -1.0, 1.0],
                                             uid=8888)
+        ICDC.prepare_data_store(self.data_store)
         qc              = ICDC.test(p, self.parameters, self.data_store)
         nlevels, zr, tr = ICDC.reordered_data(p, self.parameters)
         zreverted       = ICDC.revert_order(p, zr, self.parameters)
@@ -68,6 +69,7 @@ class TestClass:
             p = util.testingProfile.fakeProfile(torig, zorig, uid=i) 
 
             # Check the QC results are returned correctly.
+            ICDC.prepare_data_store(self.data_store)
             qc = ICDC.test(p, self.parameters, self.data_store)
             assert np.array_equal(qc, qctruth), 'Example {} QC wrong'.format(i + 1)
 

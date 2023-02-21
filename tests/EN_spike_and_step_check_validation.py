@@ -15,15 +15,14 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setUp(self):
+    def setup_method(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
         main.faketable('unit')
         main.fakerow('unit')
         # need to re-do this every time to refresh the enspikeandstep table
         qctests.EN_spike_and_step_check.loadParameters(self.parameters)
-        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
 
-    def tearDown(self):
+    def teardown_method(self):
         main.dbinteract('DROP TABLE unit;')
 
     def test_EN_spike_and_step_check_composeDT_nominal(self):
@@ -102,6 +101,7 @@ class TestClass:
         test condition A spike check in context
         '''
         p = util.testingProfile.fakeProfile([20, 24, 18, 17], [0, 10, 20, 30], latitude=20.0, uid=8888)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store)
         truth = numpy.zeros(4, dtype=bool)
         truth[1] = True
@@ -129,6 +129,7 @@ class TestClass:
         condition A spike *except* measurements too far apart to count as spike (shallow) 
         '''
         p = util.testingProfile.fakeProfile([21, 24, 18, 17], [0, 10, 70, 80], latitude=20.0, uid=8888)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store)
         truth = numpy.zeros(4, dtype=bool)
         assert numpy.array_equal(qc, truth), 'flagged a type A temperature spike spread out too far in depth (shallow)'
@@ -138,6 +139,7 @@ class TestClass:
         condition A spike *except* measurements too far apart to count as spike (deep). 
         '''
         p = util.testingProfile.fakeProfile([20, 21, 18, 17], [500, 510, 670, 680], latitude=20.0, uid=8888)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store)
         truth = numpy.zeros(4, dtype=bool)
         assert numpy.array_equal(qc, truth), 'flagged a type A temperature spike spread out too far in depth (deep)'
@@ -165,6 +167,7 @@ class TestClass:
         test condition B spike check in context
         '''
         p = util.testingProfile.fakeProfile([22.5, 24, 22.5, 22], [500, 510, 520, 530], latitude=20.0, uid=8888)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store)
         truth = numpy.zeros(4, dtype=bool)
         truth[1] = True
@@ -194,6 +197,7 @@ class TestClass:
         suspect == True since condition C is a suspected reject
         '''
         p = util.testingProfile.fakeProfile([24, 24, 2, 1], [10, 20, 30, 40], latitude=20.0, uid=1111)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store, True)
         truth = numpy.zeros(4, dtype=bool)
         truth[1] = True
@@ -239,6 +243,7 @@ class TestClass:
         suspect == True since condition C is a suspected reject
         '''
         p = util.testingProfile.fakeProfile([13, 13, 13, 1], [310, 320, 330, 340], latitude=50.0, uid=8888)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store, True)
         truth = numpy.zeros(4, dtype=bool)
         truth[3] = True
@@ -249,6 +254,7 @@ class TestClass:
         make sure trailing 0s are getting flagged as suspect
         '''
         p = util.testingProfile.fakeProfile([0, 0, 0, 0], [10, 20, 30, 40], latitude=50.0, uid=8888)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
         qc = qctests.EN_spike_and_step_check.test(p, self.parameters, self.data_store, True)
         truth = numpy.zeros(4, dtype=bool)
         truth[3] = True
