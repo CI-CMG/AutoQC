@@ -8,7 +8,7 @@ def test_AOML_gross():
     '''
 
     p = util.testingProfile.fakeProfile([40.0000001, 40, 30, 20, 10, 0, -2.5, -2.5000001], [0, 10, -10, 20, 3000, 40, 50, 60]) 
-    qc = qctests.AOML_gross.test(p, None)
+    qc = qctests.AOML_gross.test(p, None, None)
     truth = numpy.zeros(8, dtype=bool)
     truth[0] = True
     truth[2] = True

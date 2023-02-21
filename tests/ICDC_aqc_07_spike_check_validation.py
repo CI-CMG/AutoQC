@@ -5,6 +5,9 @@ import util.testingProfile
 import util.main as main
 import numpy as np
 
+from db_test_data_store import DbTestDataStore
+
+
 ##### ICDC spike check.
 ##### --------------------------------------------------
 class TestClass:
@@ -13,6 +16,7 @@ class TestClass:
         'db': 'iquod.db',
         'table': 'unit'
     }
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # refresh this table every test
@@ -42,7 +46,7 @@ class TestClass:
                     qctruth.append(int(d[2]) > 0)
                 
                 p  = util.testingProfile.fakeProfile(temps, depths, uid=i)
-                qc = ICDC_sc.test(p, self.parameters)
+                qc = ICDC_sc.test(p, self.parameters, self.data_store)
 
                 assert np.array_equal(qc, qctruth), 'Failed profile with header ' + line
 

@@ -5,6 +5,9 @@ import util.testingProfile
 import util.main as main
 import numpy as np
 
+from db_test_data_store import DbTestDataStore
+
+
 ##### ICDC maximum observed depth check.
 ##### --------------------------------------------------
 
@@ -14,6 +17,7 @@ class TestClass:
         'db': 'iquod.db',
         'table': 'unit'
     }
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # refresh this table every test
@@ -44,7 +48,7 @@ class TestClass:
                 
                 p  = util.testingProfile.fakeProfile(depths, depths, probe_type=probe_type)
                 p.primary_header['Country code'] = 'JP'
-                qc = ICDC_mol.test(p, self.parameters)
+                qc = ICDC_mol.test(p, self.parameters, self.data_store)
            
                 assert np.array_equal(qc, qctruth), 'Failed profile with header ' + line
 

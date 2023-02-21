@@ -5,7 +5,7 @@ import util.main as main
 from multiprocessing import Pool
 
 from db_buddy_finder import DbBuddyFinder
-from .db_test_data_store import DbTestDataStore
+from db_test_data_store import DbTestDataStore
 
 def run(test, profiles, parameters, data_store):
   '''

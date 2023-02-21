@@ -20,11 +20,11 @@ def test_extract_minmax():
 def test_minmax():
 
     p = util.testingProfile.fakeProfile(temp, gsw.z_from_p(pres, latitude), latitude=latitude, longitude=longitude)
-    qc = qctests.minmax.test(p, None)
+    qc = qctests.minmax.test(p, None, None)
     assert True not in qc, "author's first example profile shouldn't have any levels flagged"
 
     p = util.testingProfile.fakeProfile(flag_temp, gsw.z_from_p(flag_pres, flag_latitude), latitude=flag_latitude, longitude=flag_longitude)
-    qc = qctests.minmax.test(p, None)
+    qc = qctests.minmax.test(p, None, None)
     assert numpy.array_equal(qc, flag_result), "minmax flagged different levels than original author's pathological example"
 
 class TestFilterLatLon(unittest.TestCase):

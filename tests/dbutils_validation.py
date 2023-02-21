@@ -3,6 +3,7 @@ import qctests.EN_spike_and_step_check
 import qctests.EN_increasing_depth_check
 import qctests.EN_stability_check
 import qctests.EN_constant_value_check
+from db_test_data_store import DbTestDataStore
 from util import main
 import util.testingProfile
 import numpy
@@ -19,6 +20,10 @@ class TestClass:
         "table": 'unit'
     }
     qctests.EN_background_check.loadParameters(parameters)
+    data_store = DbTestDataStore(parameters['db'])
+
+
+
 
     def setUp(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
@@ -26,6 +31,12 @@ class TestClass:
         main.fakerow('unit')
         # need to re-do this every time to refresh the enspikeandstep table
         qctests.EN_spike_and_step_check.loadParameters(self.parameters)
+        qctests.EN_background_check.prepare_data_store(self.data_store)
+        qctests.EN_spike_and_step_check.prepare_data_store(self.data_store)
+        qctests.EN_constant_value_check.prepare_data_store(self.data_store)
+        qctests.EN_increasing_depth_check.prepare_data_store(self.data_store)
+        qctests.EN_constant_value_check.prepare_data_store(self.data_store)
+        qctests.EN_stability_check.prepare_data_store(self.data_store)
 
     def tearDown(self):
         main.dbinteract('DROP TABLE unit;')
@@ -40,7 +51,7 @@ class TestClass:
         # Create the test profile, run the QC check and save the result.
         # Expected result is [False, False, False, True].
         p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 7.1], [0.0, 2.5, 5.0, 7.5], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7, uid=8888) 
-        qc = qctests.EN_background_check.test(p, self.parameters)
+        qc = qctests.EN_background_check.test(p, self.parameters, self.data_store)
         query = "UPDATE " + self.parameters['table'] + " SET " + test + "=? WHERE uid=8888;"
         main.dbinteract(query, [main.pack_array(qc)], targetdb=self.parameters['db'])
         
@@ -63,7 +74,7 @@ class TestClass:
         # Create the test profile, run the QC check and save the result.
         # Expected result is [False, False, False, True, True, False, False, False, False, False].
         p = util.testingProfile.fakeProfile([0,0,0,0,0,0,0,0,0,0], [100,200,300,500,500,600,700,800,900,1000], latitude=0.0, uid=8888)
-        qc = qctests.EN_increasing_depth_check.test(p, self.parameters)
+        qc = qctests.EN_increasing_depth_check.test(p, self.parameters, self.data_store)
         query = "UPDATE " + self.parameters['table'] + " SET " + test + "=? WHERE uid=8888;"
         main.dbinteract(query, [main.pack_array(qc)], targetdb=self.parameters['db'])
         
@@ -86,7 +97,7 @@ class TestClass:
         # Create the test profile, run the QC check and save the result.
         # Expected result is [False, True, True, False, False, False, False, False, False].
         p = util.testingProfile.fakeProfile([13.5, 25.5, 20.4, 13.5, 13.5, 13.5, 13.5, 13.5, 13.5], [0, 10, 20, 30, 40, 50, 60, 70, 80], salinities=[40, 35, 20, 40, 40, 40, 40, 40, 40], pressures=[8000, 2000, 1000, 8000, 8000, 8000, 8000, 8000, 8000], uid=8888)
-        qc = qctests.EN_stability_check.test(p, self.parameters)
+        qc = qctests.EN_stability_check.test(p, self.parameters, self.data_store)
         query = "UPDATE " + self.parameters['table'] + " SET " + test + "=? WHERE uid=8888;"
         main.dbinteract(query, [main.pack_array(qc)], targetdb=self.parameters['db'])
         
@@ -108,7 +119,7 @@ class TestClass:
         # Create the test profile, run the QC check and save the result.
         # Expected result is [True, True, True, True, True, True, True, True, True, True].
         p = util.testingProfile.fakeProfile([0,0,0,0,0,0,0,0,0,0], [100,200,300,400,500,600,700,800,900,None], uid=8888)
-        qc = qctests.EN_constant_value_check.test(p, self.parameters)
+        qc = qctests.EN_constant_value_check.test(p, self.parameters, self.data_store)
         query = "UPDATE " + self.parameters['table'] + " SET " + test + "=? WHERE uid=8888;"
         main.dbinteract(query, [main.pack_array(qc)], targetdb=self.parameters['db'])
         

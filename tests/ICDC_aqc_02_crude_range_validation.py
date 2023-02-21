@@ -5,6 +5,9 @@ import util.testingProfile
 import util.main as main
 import numpy as np
 
+from db_test_data_store import DbTestDataStore
+
+
 ##### ICDC crude range check.
 ##### --------------------------------------------------
 
@@ -14,6 +17,7 @@ class TestClass:
         'db': 'iquod.db',
         'table': 'unit'
     }
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # refresh this table every test
@@ -37,7 +41,7 @@ class TestClass:
 
             qctruth = f > 0
             p = util.testingProfile.fakeProfile(t, z, uid=i)
-            qc = ICDC_crude_range.test(p, self.parameters)
+            qc = ICDC_crude_range.test(p, self.parameters, self.data_store)
 
             assert np.array_equal(qc, qctruth), 'Example {} failed'.format(i + 1)
 

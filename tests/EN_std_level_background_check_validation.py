@@ -2,6 +2,9 @@ import qctests.EN_std_lev_bkg_and_buddy_check
 import qctests.EN_background_check
 import qctests.EN_spike_and_step_check
 from cotede.qctests.possible_speed import haversine
+
+from buddy_finder import assessBuddyDistance
+from db_test_data_store import DbTestDataStore
 from util import main
 import util.testingProfile
 import numpy, pickle, io
@@ -38,6 +41,7 @@ class TestClass:
         "db": 'iquod.db'
     }
     qctests.EN_background_check.loadParameters(parameters)
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
@@ -59,7 +63,7 @@ class TestClass:
         '''
 
         p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 7.1], [0.0, 2.5, 5.0, 7.5], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7, uid=8888) 
-        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(p, self.parameters)
+        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(p, self.parameters, self.data_store)
         expected = [False, False, False, False]
         assert numpy.array_equal(qc, expected), 'mismatch between qc results and expected values'
 
@@ -73,7 +77,7 @@ class TestClass:
         levels.mask = False
 
         #bgev = qctests.EN_background_check.bgevStdLevels
-        qctests.EN_background_check.test(p, self.parameters) #need to populate the enbackground db with profile specific info
+        qctests.EN_background_check.test(p, self.parameters, self.data_store) #need to populate the enbackground db with profile specific info
         query = 'SELECT bgevstdlevels FROM enbackground WHERE uid = 8888'
         enbackground_pars = main.dbinteract(query) 
         bgev = numpy.load(io.BytesIO(enbackground_pars[0][0]),allow_pickle=True)
@@ -165,23 +169,23 @@ class TestClass:
 
         p1 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 12], uid=0, cruise=1)
         p2 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 13], uid=0, cruise=2)
-        assert qctests.EN_std_lev_bkg_and_buddy_check.assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with same uid'
+        assert assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with same uid'
 
         p1 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 12], uid=0, cruise=1)
         p2 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1901, 1, 1, 13], uid=1, cruise=2)
-        assert qctests.EN_std_lev_bkg_and_buddy_check.assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with different year'
+        assert assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with different year'
 
         p1 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 12], uid=0, cruise=1)
         p2 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 2, 1, 13], uid=1, cruise=2)
-        assert qctests.EN_std_lev_bkg_and_buddy_check.assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with different month'
+        assert assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with different month'
 
         p1 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 12], uid=0, cruise=1)
         p2 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 13], uid=1, cruise=1)
-        assert qctests.EN_std_lev_bkg_and_buddy_check.assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with same cruise'
+        assert assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies with same cruise'
 
         p1 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 12], uid=0, cruise=1)
         p2 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 5.01, 0, date=[1900, 1, 1, 13], uid=1, cruise=2)
-        assert qctests.EN_std_lev_bkg_and_buddy_check.assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies too far apart in latitude'
+        assert assessBuddyDistance(p1, profile_to_info_list(p2)) is None, 'accepted buddies too far apart in latitude'
 
     def test_assessBuddyDistance_haversine(self):
         '''
@@ -190,7 +194,7 @@ class TestClass:
 
         p1 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 0, 0, date=[1900, 1, 1, 12], uid=0, cruise=1)
         p2 = util.testingProfile.fakeProfile([0,0,0],[0,0,0], 1, 1, date=[1900, 1, 1, 13], uid=1, cruise=2)
-        assert qctests.EN_std_lev_bkg_and_buddy_check.assessBuddyDistance(p1, profile_to_info_list(p2)) == haversine(0,0,1,1), 'haversine calculation inconsistent with cotede.qctests.possible_speed.haversine'
+        assert assessBuddyDistance(p1, profile_to_info_list(p2)) == haversine(0,0,1,1), 'haversine calculation inconsistent with cotede.qctests.possible_speed.haversine'
 
 
     def test_timeDiff(self):
@@ -220,7 +224,7 @@ class TestClass:
         '''
 
         main.fakerow('unit', raw='x', truth=0, uid=1, year=2000, month=1, day=15, time=12, lat=-39.889, longitude=17.650000, cruise=1, probe=2)
-        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile1, self.parameters)
+        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile1, self.parameters, self.data_store)
 
         assert numpy.array_equal(qc, truthQC1), 'mismatch between qc results and expected values'
 
@@ -231,7 +235,7 @@ class TestClass:
 
         main.fakerow('unit', raw='x', truth=0, uid=2, year=2000, month=1, day=10, time=0, lat=-30.229, longitude=2.658, cruise=2, probe=2)
         main.fakerow('unit', raw='x', truth=0, uid=3, year=2000, month=1, day=10, time=0.1895833, lat=-28.36, longitude=-0.752, cruise=3, probe=2)
-        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile2, self.parameters, allow_level_reinstating=False)
+        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile2, self.parameters, self.data_store, allow_level_reinstating=False)
 
         assert numpy.array_equal(qc, truthQC2), 'mismatch between qc results and expected values'
 
@@ -242,7 +246,7 @@ class TestClass:
 
         main.fakerow('unit', raw='x', truth=0, uid=2, year=2000, month=1, day=10, time=0, lat=-30.229, longitude=2.658, cruise=2, probe=2)
         main.fakerow('unit', raw='x', truth=0, uid=3, year=2000, month=1, day=10, time=0.1895833, lat=-28.36, longitude=-0.752, cruise=3, probe=2)
-        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile2, self.parameters)
+        qc = qctests.EN_std_lev_bkg_and_buddy_check.test(realProfile2, self.parameters, self.data_store)
         assert numpy.all(qc == False), 'mismatch between qc results and expected values'
 
 realProfile1 = util.testingProfile.fakeProfile(

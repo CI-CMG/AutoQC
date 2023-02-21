@@ -1,4 +1,4 @@
-from .test_data_store import TestDataStore
+from test_data_store import TestDataStore
 import util.main as main
 
 class DbTestDataStore(TestDataStore):

@@ -1,5 +1,6 @@
 import qctests.EN_background_available_check
 import qctests.EN_background_check
+from db_test_data_store import DbTestDataStore
 from util import main
 import util.testingProfile
 import numpy
@@ -13,6 +14,7 @@ class TestClass:
         "table": 'unit'
     }
     qctests.EN_background_check.loadParameters(parameters)
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
@@ -28,7 +30,7 @@ class TestClass:
         '''
 
         p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 1.8], [0.0, 2.5, 5.0, 5600.0], latitude=55.6, longitude=12.9, date=[1900, 1, 15, 0], probe_type=7) 
-        qc = qctests.EN_background_available_check.test(p, self.parameters)
+        qc = qctests.EN_background_available_check.test(p, self.parameters, self.data_store)
         expected = [False, False, False, True]
         assert numpy.array_equal(qc, expected), 'mismatch between qc results and expected values'
 
@@ -38,7 +40,7 @@ class TestClass:
         '''
 
         p = util.testingProfile.fakeProfile([1.8, 1.8, 1.8, 1.8], [0.0, 2.5, 5.0, 7.5], latitude=0.0, longitude=20.0, date=[1900, 1, 15, 0], probe_type=7) 
-        qc = qctests.EN_background_available_check.test(p, self.parameters)
+        qc = qctests.EN_background_available_check.test(p, self.parameters, self.data_store)
         expected = [True, True, True, True]
         assert numpy.array_equal(qc, expected), 'mismatch between qc results and expected values'
 

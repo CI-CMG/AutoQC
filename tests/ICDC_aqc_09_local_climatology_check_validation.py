@@ -5,6 +5,9 @@ import util.testingProfile
 import util.main as main
 import numpy as np
 
+from db_test_data_store import DbTestDataStore
+
+
 ##### ICDC local climatology check.
 ##### --------------------------------------------------
 class TestClass:
@@ -13,6 +16,7 @@ class TestClass:
         'db': 'iquod.db',
         'table': 'unit'
     }
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # refresh this table every test
@@ -71,7 +75,7 @@ class TestClass:
                 assert np.max(np.abs(tmin - climmin)) < 0.001, 'TMIN failed for profile with header ' + line
                 assert np.max(np.abs(tmax - climmax)) < 0.001, 'TMAX failed for profile with header ' + line
 
-                qc = ICDC_lc.test(p, self.parameters)
+                qc = ICDC_lc.test(p, self.parameters, self.data_store)
                 assert np.array_equal(qc, qctruth), 'QC failed profile with header ' + line
 
 # Data provided by Viktor Gouretski, ICDC, University of Hamburg.

@@ -1,5 +1,6 @@
 import numpy as np
 import util.testingProfile
+from cotede_qc.cotede_test import load_parameters
 
 '''Tests to ensure that we are running the CoTeDe tests
    as expected. The data are from the seabird package
@@ -12,7 +13,9 @@ def test_CoTeDe_anomaly_detection():
     Make sure CoTeDe anomaly detection is working as expected.
     '''
     import qctests.CoTeDe_anomaly_detection
-    qc = qctests.CoTeDe_anomaly_detection.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_anomaly_detection.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_anomaly_detection), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_Argo_density_inversion():
@@ -29,8 +32,10 @@ def test_CoTeDe_Argo_density_inversion():
                                            latitude   = 4.10566666667,
                                            longitude  = -38.0133333333,
                                            date       = [2008, 4, 17, 0.94361111],
-                                           uid        = 888) 
-    qc = qctests.CoTeDe_Argo_density_inversion.test(padi, None)
+                                           uid        = 888)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_Argo_density_inversion.test(padi, parameters, None)
     assert np.array_equal(qc, expected_qc_Argo_density_inversion), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_digit_roll_over():
@@ -38,7 +43,9 @@ def test_CoTeDe_digit_roll_over():
     Make sure CoTeDe digit roll over is working as expected.
     '''
     import qctests.CoTeDe_digit_roll_over
-    qc = qctests.CoTeDe_digit_roll_over.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_digit_roll_over.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_digit_roll_over), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_fuzzy_logic():
@@ -46,7 +53,9 @@ def test_CoTeDe_fuzzy_logic():
     Make sure CoTeDe fuzzy logic is working as expected.
     '''
     import qctests.CoTeDe_fuzzy_logic
-    qc = qctests.CoTeDe_fuzzy_logic.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_fuzzy_logic.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_fuzzy_logic), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_Morello2014():
@@ -54,7 +63,9 @@ def test_CoTeDe_Morello2014():
     Make sure CoTeDe Morello 2014 is working as expected.
     '''
     import qctests.CoTeDe_Morello2014
-    qc = qctests.CoTeDe_Morello2014.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_Morello2014.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_Morello2014), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_gradient():
@@ -62,7 +73,9 @@ def test_CoTeDe_gradient():
     Make sure CoTeDe gradient is working as expected.
     '''
     import qctests.CoTeDe_gradient
-    qc = qctests.CoTeDe_gradient.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_gradient.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_gradient), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_GTSPP_global_range():
@@ -70,7 +83,9 @@ def test_CoTeDe_GTSPP_global_range():
     Make sure CoTeDe GTSPP global range is working as expected.
     '''
     import qctests.CoTeDe_GTSPP_global_range
-    qc = qctests.CoTeDe_GTSPP_global_range.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_GTSPP_global_range.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_GTSPP_global_range), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_GTSPP_gradient():
@@ -78,7 +93,9 @@ def test_CoTeDe_GTSPP_gradient():
     Make sure CoTeDe gradient is working as expected.
     '''
     import qctests.CoTeDe_GTSPP_gradient
-    qc = qctests.CoTeDe_GTSPP_gradient.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_GTSPP_gradient.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_GTSPP_gradient), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_GTSPP_spike_check():
@@ -86,7 +103,9 @@ def test_CoTeDe_GTSPP_spike_check():
     Make sure CoTeDe spike check is working as expected.
     '''
     import qctests.CoTeDe_GTSPP_spike_check
-    qc = qctests.CoTeDe_GTSPP_spike_check.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_GTSPP_spike_check.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_GTSPP_spike_check), 'mismatch between qc results and expected values'
 
 def CoTeDe_GTSPP_WOA_normbias():
@@ -94,7 +113,9 @@ def CoTeDe_GTSPP_WOA_normbias():
     Make sure CoTeDe WOA normbias is working as expected.
     '''
     import qctests.CoTeDe_GTSPP_WOA_normbias
-    qc = qctests.CoTeDe_GTSPP_WOA_normbias.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_GTSPP_WOA_normbias.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_GTSPP_WOA_normbias), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_location_at_sea_test_ocean_point():
@@ -102,7 +123,9 @@ def test_CoTeDe_location_at_sea_test_ocean_point():
     Make sure CoTeDe location at sea test is working as expected when given an ocean location.
     '''
     import qctests.CoTeDe_location_at_sea_test
-    qc = qctests.CoTeDe_location_at_sea_test.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_location_at_sea_test.test(p, parameters, None)
     assert np.all(qc == False), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_location_at_sea_test_land_point():
@@ -116,8 +139,10 @@ def test_CoTeDe_location_at_sea_test_land_point():
                                             latitude   = -4.10566666667,
                                             longitude  = -38.5133333333,
                                             date       = [2008, 4, 17, 0.94361111],
-                                            uid        = 999) 
-    qc = qctests.CoTeDe_location_at_sea_test.test(pland, None)
+                                            uid        = 999)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_location_at_sea_test.test(pland, parameters, None)
     assert np.all(qc), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_GTSPP_profile_envelop():
@@ -125,7 +150,9 @@ def test_CoTeDe_GTSPP_profile_envelop():
     Make sure CoTeDe profile_envelop is working as expected.
     '''
     import qctests.CoTeDe_GTSPP_profile_envelop
-    qc = qctests.CoTeDe_GTSPP_profile_envelop.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_GTSPP_profile_envelop.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_profile_envelop), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_rate_of_change():
@@ -133,7 +160,9 @@ def test_CoTeDe_rate_of_change():
     Make sure CoTeDe rate_of_change is working as expected.
     '''
     import qctests.CoTeDe_rate_of_change
-    qc = qctests.CoTeDe_rate_of_change.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_rate_of_change.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_roc), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_spike():
@@ -141,7 +170,9 @@ def test_CoTeDe_spike():
     Make sure CoTeDe spike is working as expected.
     '''
     import qctests.CoTeDe_spike
-    qc = qctests.CoTeDe_spike.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_spike.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_spike), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_tukey53H_norm():
@@ -149,7 +180,9 @@ def test_CoTeDe_tukey53H_norm():
     Make sure CoTeDe tukey53H norm is working as expected.
     '''
     import qctests.CoTeDe_tukey53H_norm
-    qc = qctests.CoTeDe_tukey53H_norm.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_tukey53H_norm.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_tukey53H_norm), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_tukey53H():
@@ -157,7 +190,9 @@ def test_CoTeDe_tukey53H():
     Make sure CoTeDe tukey53H is working as expected.
     '''
     import qctests.CoTeDe_tukey53H
-    qc = qctests.CoTeDe_tukey53H.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_tukey53H.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_tukey53H), 'mismatch between qc results and expected values'
 
 def test_CoTeDe_WOA_normbias():
@@ -165,7 +200,9 @@ def test_CoTeDe_WOA_normbias():
     Make sure CoTeDe WOA normbias is working as expected.
     '''
     import qctests.CoTeDe_WOA_normbias
-    qc = qctests.CoTeDe_WOA_normbias.test(p, None)
+    parameters = {}
+    load_parameters(parameters)
+    qc = qctests.CoTeDe_WOA_normbias.test(p, parameters, None)
     assert np.array_equal(qc, expected_qc_WOA_normbias), 'mismatch between qc results and expected values'
 
 

@@ -3,6 +3,8 @@ import qctests.EN_stability_check
 import util.testingProfile
 import numpy
 import util.main as main
+from db_test_data_store import DbTestDataStore
+
 
 ##### EN_stability_check ----------------------------------------------
 
@@ -12,6 +14,7 @@ class TestClass:
         'db': 'iquod.db',
         "table": 'unit'
     }
+    data_store = DbTestDataStore(parameters['db'])
 
     def setUp(self):
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
@@ -48,7 +51,7 @@ class TestClass:
         '''
 
         p = util.testingProfile.fakeProfile([13.5, 25.5, 20.4, 13.5, 13.5, 13.5, 13.5, 13.5, 13.5], [0, 10, 20, 30, 40, 50, 60, 70, 80], salinities=[40, 35, 20, 40, 40, 40, 40, 40, 40], pressures=[8000, 2000, 1000, 8000, 8000, 8000, 8000, 8000, 8000], uid=8888)
-        qc = qctests.EN_stability_check.test(p, self.parameters)
+        qc = qctests.EN_stability_check.test(p, self.parameters, self.data_store)
         truth = numpy.ma.array([False, True, True, False, False, False, False, False, False], mask=False)
         assert numpy.array_equal(qc, truth), 'failed to flag padded stability example'
 
@@ -60,6 +63,6 @@ class TestClass:
         '''
 
         p = util.testingProfile.fakeProfile([13.5, 25.5, 20.4, 13.5], [0, 10, 20, 30], salinities=[40, 35, 20, 40], pressures=[8000, 2000, 1000, 8000], uid=8888)
-        qc = qctests.EN_stability_check.test(p, self.parameters)
+        qc = qctests.EN_stability_check.test(p, self.parameters, self.data_store)
         truth = numpy.ma.array([True, True, True, True], mask=False)
         assert numpy.array_equal(qc, truth), 'failed to flag unpadded stability example'

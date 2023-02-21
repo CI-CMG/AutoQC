@@ -9,14 +9,14 @@ def test_AOML_gradient_boundaries():
     '''
 
     p = util.testingProfile.fakeProfile([500000,400000,299999], [100000,200000,300000]) 
-    qc = qctests.AOML_gradient.test(p, None)
+    qc = qctests.AOML_gradient.test(p, None, None)
     truth = numpy.zeros(3, dtype=bool)
     truth[1] = True
     truth[2] = True
     assert numpy.array_equal(qc, truth), 'incorrectly flagging boundaries of decreasing temperature gradient.'
 
     p = util.testingProfile.fakeProfile([480000,500000,520000], [100000,200000,299999]) 
-    qc = qctests.AOML_gradient.test(p, None)
+    qc = qctests.AOML_gradient.test(p, None, None)
     truth = numpy.zeros(3, dtype=bool)
     truth[1] = True
     truth[2] = True
@@ -29,6 +29,6 @@ def test_AOML_gradient_edge():
     '''
 
     p = util.testingProfile.fakeProfile([1.8,1], [2,1]) 
-    qc = qctests.AOML_gradient.test(p, None)
+    qc = qctests.AOML_gradient.test(p, None, None)
     truth = numpy.zeros(2, dtype=bool)
     assert numpy.array_equal(qc, truth), 'flagged a moderate gradient even though temperature was decreasing'

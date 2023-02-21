@@ -19,14 +19,14 @@ def test_AOML_spike_slice():
     '''
 
     p = util.testingProfile.fakeProfile([20,199,200,201,16],[1,2,3,4,5])
-    qc = qctests.AOML_spike.test(p, None)
+    qc = qctests.AOML_spike.test(p, None, None)
     truth = numpy.zeros(5, dtype=bool)
     truth[2] = True
     truth[3] = True
     assert numpy.array_equal(qc, truth), 'mishandled spikes on interior of profile'
 
     p = util.testingProfile.fakeProfile([20,190,18,18,18,170,16],[1,2,3,4,5,5,7])
-    qc = qctests.AOML_spike.test(p, None)
+    qc = qctests.AOML_spike.test(p, None, None)
     truth = numpy.zeros(7, dtype=bool)
     truth[1] = True
     truth[5] = True
