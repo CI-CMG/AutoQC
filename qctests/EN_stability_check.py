@@ -7,8 +7,6 @@ import math
 
 import numpy
 
-from util.dbutils import retrieve_existing_qc_result
-
 
 def test(p, parameters, data_store):
     """ 

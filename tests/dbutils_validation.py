@@ -9,7 +9,6 @@ import util.testingProfile
 import numpy
 from util import dbutils
 from util.dbutils import qc_action
-from util.dbutils import retrieve_existing_qc_result
 
 #####  ---------------------------------------------------
 

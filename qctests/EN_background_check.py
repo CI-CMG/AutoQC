@@ -81,6 +81,7 @@ def run_qc(p, parameters, data_store):
     pressures = gsw.p_from_z(-depth, p.latitude())
 
     # Use the EN_spike_and_step_check to find suspect values.
+    EN_spike_and_step_check.prepare_data_store(data_store)
     suspect = EN_spike_and_step_check.test(p, parameters, data_store, suspect=True)
 
     # Loop over levels.

@@ -127,7 +127,7 @@ def get_climatology_range(nlevels, z, lat, lon, month, paramsicdc09):
     return tmin, tmax
 
 def prepare_data_store(data_store):
-    pass
+    ICDC.prepare_data_store(data_store)
 
 def loadParameters(parameterStore):
     datadict = {}

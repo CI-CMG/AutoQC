@@ -66,7 +66,7 @@ parminover = -2.3
 parmaxover = 33.0
 
 def prepare_data_store(data_store):
-  pass
+  ICDC.prepare_data_store(data_store)
 
 def loadParameters(parameterStore):
   pass

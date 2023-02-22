@@ -1,4 +1,7 @@
+import io
+import pickle
 import sqlite3
+import numpy as np
 
 from test_data_store import TestDataStore
 import util.main as main
@@ -21,13 +24,33 @@ class DbTestDataStore(TestDataStore):
     main.dbinteract(sql, targetdb=self.__db)
     self.__model[key] = field_list
 
+  def __serialize(self, arr):
+    out = io.BytesIO()
+    if type(arr) is np.ndarray or type(arr) is np.ma.core.MaskedArray:
+      arr.dump(out)
+    elif type(arr) is list:
+      pickle.dump(arr, out)
+    out.seek(0)
+    return sqlite3.Binary(out.read())
+
+  def __deserialize(self, blob):
+    result = None
+    if blob:
+      bytes_io = io.BytesIO(blob)
+      if bytes_io.getbuffer().nbytes:
+        try:
+          result = np.load(bytes_io,allow_pickle=True)
+        except:
+          result = pickle.load(bytes_io)
+    return result
+
   def put(self, uid, key, field_dict):
     placeholders = ["?"]
     parameters = [uid]
     for field in self.__model[key]:
       placeholders.append("?")
       if field['type'] == 'BLOB':
-        parameters.append(sqlite3.Binary(main.pack_array(field_dict[field['name']])))
+        parameters.append(sqlite3.Binary(self.__serialize(field_dict[field['name']])))
       else:
         parameters.append(field_dict[field['name']])
     sql = "REPLACE INTO " + key + " VALUES(" + (",".join(placeholders)) + ")"
@@ -46,7 +69,7 @@ class DbTestDataStore(TestDataStore):
       i = 0
       for field in field_list:
         if field['type'] == 'BLOB':
-          field_dict[field['name']] = main.unpack_row(db_result[0][i])
+          field_dict[field['name']] = self.__deserialize(db_result[0][i])
         else:
           field_dict[field['name']] = db_result[0][i]
         i += 1

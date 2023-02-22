@@ -61,7 +61,7 @@ def test(p, parameters, data_store):
 
 
 def prepare_data_store(data_store):
-    pass
+    ICDC.prepare_data_store(data_store)
 
 def loadParameters(parameterStore):
     pass

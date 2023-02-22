@@ -62,7 +62,7 @@ class TestClass:
                                                      date=[year,month,day,0],
                                                      uid=i)
 
-                nlevels, z, t = ICDC.reordered_data(p, self.parameters)
+                nlevels, z, t = ICDC.reordered_data(p, self.data_store)
                 lat           = p.latitude()
                 lon           = p.longitude()
                 tmin, tmax    = ICDC_lc.get_climatology_range(nlevels, 

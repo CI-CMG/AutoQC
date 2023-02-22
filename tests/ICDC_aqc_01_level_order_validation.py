@@ -34,8 +34,8 @@ class TestClass:
                                             uid=8888)
         ICDC.prepare_data_store(self.data_store)
         qc              = ICDC.test(p, self.parameters, self.data_store)
-        nlevels, zr, tr = ICDC.reordered_data(p, self.parameters)
-        zreverted       = ICDC.revert_order(p, zr, self.parameters)
+        nlevels, zr, tr = ICDC.reordered_data(p, self.data_store)
+        zreverted       = ICDC.revert_order(p, zr, self.data_store)
         zreverted_truth = np.ma.array([2.0, -1.0, 1.0],
                                       mask = [False, True, False])
 
@@ -74,7 +74,7 @@ class TestClass:
             assert np.array_equal(qc, qctruth), 'Example {} QC wrong'.format(i + 1)
 
             # Check that the reordering is correct.
-            nlevels, zr, tr = ICDC.reordered_data(p, self.parameters)
+            nlevels, zr, tr = ICDC.reordered_data(p, self.data_store)
             assert np.array_equal(zr, ztruth), 'Example {} zr wrong'.format(i + 1)
             assert np.array_equal(tr, ttruth), 'Example {} tr wrong'.format(i + 1)
 
