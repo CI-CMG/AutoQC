@@ -130,6 +130,7 @@ class TestClass:
         '''
         
         test = 'wod_range_check'
+        self.data_store.prepare(test, [{'name':'qc_log', 'type':'BLOB'}])
         retrieved_qc = self.data_store.get(8888, test)['qc_log']
         
         assert retrieved_qc is None, 'None not returned if QC not available'

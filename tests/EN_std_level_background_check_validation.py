@@ -4,6 +4,7 @@ import qctests.EN_spike_and_step_check
 from cotede.qctests.possible_speed import haversine
 
 from buddy_finder import assessBuddyDistance
+from db_buddy_finder import DbBuddyFinder
 from db_test_data_store import DbTestDataStore
 from util import main
 import util.testingProfile
@@ -38,7 +39,8 @@ class TestClass:
 
     parameters = {
         "table": 'unit',
-        "db": 'iquod.db'
+        "db": 'iquod.db',
+        "buddy_finder": DbBuddyFinder()
     }
     qctests.EN_background_check.loadParameters(parameters)
     data_store = DbTestDataStore(parameters['db'])

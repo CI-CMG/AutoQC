@@ -1,6 +1,6 @@
 import util.main as main
 
-from .buddy_finder import BuddyFinder, Buddy
+from buddy_finder import BuddyFinder, Buddy
 
 
 class DbBuddyFinder(BuddyFinder):
