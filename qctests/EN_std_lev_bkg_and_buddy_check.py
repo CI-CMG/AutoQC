@@ -341,7 +341,7 @@ def timeDiff(p1, p2):
 
 
 def prepare_data_store(data_store):
-    pass
+    EN_background_check.prepare_data_store(data_store)
 
 def loadParameters(parameterStore):
     pass

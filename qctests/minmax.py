@@ -5,7 +5,7 @@ def test(p, parameters, data_store):
 
     ## unpack profile data
     temp = p.t()
-    temp_min, temp_max = extract_minmax(-obs_utils.depth_to_pressure(p.z(), p.latitude()), p.longitude(), p.latitude())
+    temp_min, temp_max = extract_minmax(parameters, -obs_utils.depth_to_pressure(p.z(), p.latitude()), p.longitude(), p.latitude())
 
     # true flag if temp is out of range
     qc = numpy.zeros(p.n_levels(), dtype=bool)
@@ -17,14 +17,12 @@ def test(p, parameters, data_store):
 
     return qc
 
-def extract_minmax(pres, longitude, latitude):
-    ## unpack minmax parameters
-    minmax_temp = xarray.open_dataset('data/TEMP_MIN_MAX.nc')
-    minmax_grid = xarray.open_dataset('data/GRID_MIN_MAX.nc')
-    info_DGG = scipy.io.loadmat('data/info_DGG4H6.mat')
+def extract_minmax(parameters, pres, longitude, latitude):
+
+
     lon = numpy.asarray([longitude])
     lat = numpy.asarray([latitude])
-    hgrid_id = lon_lat_to_min_max_index(lon, lat, info_DGG, '4H6')
+    hgrid_id = lon_lat_to_min_max_index(lon, lat, parameters['info_DGG'], '4H6')
 
     layer_id = numpy.empty((pres.shape))
     layer_id[:] = numpy.NaN
@@ -34,10 +32,10 @@ def extract_minmax(pres, longitude, latitude):
     temp_max[:] = numpy.NaN
 
     ## determine minmax range
-    layer_id = val2index(pres, minmax_temp.depth.data)
+    layer_id = val2index(pres, parameters['minmax_temp'].depth.data)
     nonan = ~numpy.isnan(layer_id)
-    temp_min[numpy.where(nonan)[0]] = minmax_temp.temp_min.data[hgrid_id,layer_id[nonan].astype(int)]
-    temp_max[numpy.where(nonan)[0]] = minmax_temp.temp_max.data[hgrid_id,layer_id[nonan].astype(int)]
+    temp_min[numpy.where(nonan)[0]] = parameters['minmax_temp'].temp_min.data[hgrid_id,layer_id[nonan].astype(int)]
+    temp_max[numpy.where(nonan)[0]] = parameters['minmax_temp'].temp_max.data[hgrid_id,layer_id[nonan].astype(int)]
     return temp_min, temp_max
 
 def lon_lat_to_min_max_index(longitude, latitude, info_file, isea_type):
@@ -369,4 +367,7 @@ def prepare_data_store(data_store):
     pass
 
 def loadParameters(parameterStore):
-    pass
+    ## unpack minmax parameters
+    parameterStore['minmax_temp'] = xarray.open_dataset('data/TEMP_MIN_MAX.nc')
+    parameterStore['minmax_grid'] = xarray.open_dataset('data/GRID_MIN_MAX.nc')
+    parameterStore['info_DGG'] = scipy.io.loadmat('data/info_DGG4H6.mat')

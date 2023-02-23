@@ -1,3 +1,5 @@
+import os
+
 import qctests.ICDC_aqc_10_local_climatology_check as ICDC
 
 import util.testingProfile
@@ -16,11 +18,12 @@ class TestClass():
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setup_method(self):
+    def setUp(self):
+        if os.path.exists("iquod.db"): os.remove("iquod.db")
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
 
-    def teardown_method(self):
+    def tearDown(self):
         pass
 
     def test_ICDC_10_local_climatology_check_locs(self):

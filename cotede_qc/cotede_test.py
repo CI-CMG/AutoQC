@@ -16,7 +16,7 @@ def load_parameters(parameters):
     # Purposely opening these NetCDF resource and not closing them as a workaround for a memory leak.
     # https://github.com/Unidata/netcdf4-python/issues/1021
     if not parameters.get('cars_db'):
-        parameters['etopo_dbs'] = {'5min': ETOPO('5min')}
+        parameters['etopo_dbs'] = {'5min': ETOPO(resolution='5min')}
         parameters['cars_db'] = CARS()
         parameters['woa_db'] = WOA()
 

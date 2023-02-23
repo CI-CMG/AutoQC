@@ -12,12 +12,13 @@ class TestClass:
     distRes = 20000. #meters
     timeRes = 600.   #seconds
 
-    def setup_method(self):
+    def setUp(self):
+        if os.path.exists("iquod.db"): os.remove("iquod.db")
         qctests.EN_track_check.EN_track_results = {}
         qctests.EN_track_check.EN_track_headers = {}
         qctests.EN_track_check.threadFile       = ''
 
-    def teardown_method(self):
+    def tearDown(self):
         del qctests.EN_track_check.EN_track_results
         del qctests.EN_track_check.EN_track_headers
         del qctests.EN_track_check.threadFile

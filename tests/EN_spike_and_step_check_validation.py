@@ -1,3 +1,5 @@
+import os
+
 import qctests.EN_spike_and_step_check
 
 import util.testingProfile
@@ -15,14 +17,15 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setup_method(self):
+    def setUp(self):
+        if os.path.exists("iquod.db"): os.remove("iquod.db")
         # this qc test will go looking for the profile in question in the db, needs to find something sensible
         main.faketable('unit')
         main.fakerow('unit')
         # need to re-do this every time to refresh the enspikeandstep table
         qctests.EN_spike_and_step_check.loadParameters(self.parameters)
 
-    def teardown_method(self):
+    def tearDown(self):
         main.dbinteract('DROP TABLE unit;')
 
     def test_EN_spike_and_step_check_composeDT_nominal(self):

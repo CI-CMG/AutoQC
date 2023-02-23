@@ -1,3 +1,5 @@
+import os
+
 import qctests.ICDC_aqc_01_level_order as ICDC
 import qctests.ICDC_aqc_06_n_temperature_extrema as ICDC_nte
 
@@ -18,11 +20,12 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setup_method(self):
+    def setUp(self):
+        if os.path.exists("iquod.db"): os.remove("iquod.db")
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
 
-    def teardown_method(self):
+    def tearDown(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_n_temperature_extrema(self):

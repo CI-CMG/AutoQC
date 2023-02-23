@@ -1,3 +1,5 @@
+import os
+
 import qctests.minmax
 import util.testingProfile
 import numpy, gsw, unittest
@@ -7,24 +9,28 @@ def test_extract_minmax():
     '''
     Spot-check the extraction of min and max temperature ranges for the minmax test
     '''
-
-    min, max = qctests.minmax.extract_minmax(numpy.asarray(pres), longitude, latitude)
+    parameters = {}
+    qctests.minmax.loadParameters(parameters)
+    min, max = qctests.minmax.extract_minmax(parameters, numpy.asarray(pres), longitude, latitude)
 
     assert numpy.array_equal(min, temp_min), "temperature minima don't match original author's example"
     assert numpy.array_equal(max, temp_max), "temperature maxima don't match original author's example"
 
-    flag_min, flag_max = qctests.minmax.extract_minmax(numpy.asarray(flag_pres), flag_longitude, flag_latitude)
+    flag_min, flag_max = qctests.minmax.extract_minmax(parameters, numpy.asarray(flag_pres), flag_longitude, flag_latitude)
     assert numpy.array_equal(flag_min, flag_temp_min), "temperature minima don't match original author's flagged example"
     assert numpy.array_equal(flag_max, flag_temp_max), "temperature maxima don't match original author's flagged example"
 
 def test_minmax():
 
+    parameters = {}
+    qctests.minmax.loadParameters(parameters)
+
     p = util.testingProfile.fakeProfile(temp, gsw.z_from_p(pres, latitude), latitude=latitude, longitude=longitude)
-    qc = qctests.minmax.test(p, None, None)
+    qc = qctests.minmax.test(p, parameters, None)
     assert True not in qc, "author's first example profile shouldn't have any levels flagged"
 
     p = util.testingProfile.fakeProfile(flag_temp, gsw.z_from_p(flag_pres, flag_latitude), latitude=flag_latitude, longitude=flag_longitude)
-    qc = qctests.minmax.test(p, None, None)
+    qc = qctests.minmax.test(p, parameters, None)
     assert numpy.array_equal(qc, flag_result), "minmax flagged different levels than original author's pathological example"
 
 class TestFilterLatLon(unittest.TestCase):
@@ -32,6 +38,7 @@ class TestFilterLatLon(unittest.TestCase):
     correctly made missing."""
 
     def setUp(self):
+        if os.path.exists("iquod.db"): os.remove("iquod.db")
         # Set up the arrays that will be used for all three tests, need to
         # specify dtype as float as otherwise elements can't be replaced by nan.
         self.latitude = numpy.array([1, 2, 3, 4], dtype=float)

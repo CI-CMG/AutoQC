@@ -1,3 +1,5 @@
+import os
+
 import qctests.ICDC_aqc_01_level_order as ICDC
 
 import util.testingProfile
@@ -18,12 +20,13 @@ class TestClass:
     }
     data_store = DbTestDataStore(parameters['db'])
 
-    def setup_method(self):
+    def setUp(self):
+        if os.path.exists("iquod.db"): os.remove("iquod.db")
         # refresh this table every test
         ICDC.loadParameters(self.parameters)
         ICDC.prepare_data_store(self.data_store)
 
-    def teardown_method(self):
+    def tearDown(self):
         main.dbinteract('DROP TABLE icdclevelorder;')
 
     def test_ICDC_level_order_simple(self):
