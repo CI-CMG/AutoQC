@@ -52,7 +52,7 @@ class ProfileFilter(object):
         return False
       if not isinstance(tempqc.data[i], np.integer):
         return False
-      if not tempqc.data[i] > 0:
-        return False
+      #if not tempqc.data[i] > 0:
+      #  return False
 
     return True
